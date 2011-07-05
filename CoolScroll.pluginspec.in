@@ -1,0 +1,11 @@
+<plugin name=\"CoolScroll\" version=\"0.0.1\" compatVersion=\"0.0.1\">
+    <vendor>Zhuk</vendor>
+    <copyright>(C) Zhuk Egor</copyright>
+    <license>LGPL</license>
+    <description>Plugin replaces default scollbar in editor</description>
+    <url></url>
+    <dependencyList>
+        <dependency name=\"Core\" version=\"$$QTCREATOR_VERSION\"/>
+    </dependencyList>
+</plugin>
+
