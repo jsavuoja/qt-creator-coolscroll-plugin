@@ -16,6 +16,8 @@
 #include <QtGui/QMainWindow>
 #include <QtGui/QMenu>
 #include <QtGui/QScrollBar>
+#include <QtGui/QPushButton>
+#include <QtGui/QTextBlock>
 
 #include <QtCore/QtPlugin>
 
@@ -96,8 +98,6 @@ void CoolScrollPlugin::on_editorCreated(Core::IEditor *editor, const QString &fi
 
     baseEditor->setVerticalScrollBar(new CoolScrollBar(baseEditor));
 
-
-    qDebug() << "Editor:" << fileName;
 }
 
 Q_EXPORT_PLUGIN2(CoolScroll, CoolScrollPlugin)
