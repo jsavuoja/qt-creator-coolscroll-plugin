@@ -6,6 +6,7 @@
 #include <QtGui/QPainter>
 #include <QtGui/QStyle>
 #include <QDebug>
+#include <texteditor/basetexteditor.h>
 
 CoolScrollBar::CoolScrollBar(TextEditor::BaseTextEditorWidget* edit)
     : m_parentEdit(edit)
@@ -92,10 +93,4 @@ int CoolScrollBar::unfoldedLinesCount() const
 int CoolScrollBar::linesInViewportCount() const
 {
     return (2 * m_parentEdit->document()->lineCount() - unfoldedLinesCount() - maximum());
-}
-
-int CoolScrollBar::calculateSliderLenght() const
-{
-    uint valueRange = maximum() - minimum();
-    return (pageStep() * height()) / (valueRange + pageStep());
 }

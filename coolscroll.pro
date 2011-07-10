@@ -6,12 +6,14 @@ DEFINES += COOLSCROLL_LIBRARY
 # CoolScroll files
 
 SOURCES += coolscrollplugin.cpp \
-    coolscrollbar.cpp
+    coolscrollbar.cpp \
+    coolscrollbarsettings.cpp
 
 HEADERS += coolscrollplugin.h\
         coolscroll_global.h\
         coolscrollconstants.h \
-    coolscrollbar.h
+    coolscrollbar.h \
+    coolscrollbarsettings.h
 
 OTHER_FILES = CoolScroll.pluginspec
 

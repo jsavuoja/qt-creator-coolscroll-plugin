@@ -2,7 +2,13 @@
 #define COOLSCROLLAREA_H
 
 #include <QtGui/QScrollBar>
-#include <texteditor/basetexteditor.h>
+
+namespace TextEditor
+{
+    class BaseTextEditorWidget;
+}
+
+class CoolScrollBarSettings;
 
 class CoolScrollBar : public QScrollBar
 {
@@ -12,6 +18,8 @@ public:
 
     inline int scrollBarWidth() const { return m_scrollBarWidth; }
     inline void setScrollBarWidth(int w) { m_scrollBarWidth = w; }
+
+    static void setSettings(CoolScrollBarSettings* s) { m_settings = s; }
 
 protected:
 
@@ -23,13 +31,13 @@ protected:
     int unfoldedLinesCount() const;
     int linesInViewportCount() const;
 
-    int calculateSliderLenght() const;
-
 private:
 
     TextEditor::BaseTextEditorWidget* m_parentEdit;
 
     int m_scrollBarWidth;
+
+    static CoolScrollBarSettings* m_settings;
 
 };
 
