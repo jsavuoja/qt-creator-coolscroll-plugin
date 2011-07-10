@@ -21,13 +21,13 @@
 
 #include <QtCore/QtPlugin>
 
-#include <QDebug>
-
+#include "coolscrollbarsettings.h"
 #include "coolscrollbar.h"
 
 using namespace CoolScroll::Internal;
 
-CoolScrollPlugin::CoolScrollPlugin()
+CoolScrollPlugin::CoolScrollPlugin() :
+    m_settings(new CoolScrollbarSettings)
 {
     // Create your members
 }
@@ -96,7 +96,7 @@ void CoolScrollPlugin::on_editorCreated(Core::IEditor *editor, const QString &fi
     TextEditor::BaseTextEditorWidget* baseEditor = qobject_cast<TextEditor::BaseTextEditorWidget*>
                                                    (editor->widget());
 
-    baseEditor->setVerticalScrollBar(new CoolScrollBar(baseEditor));
+    baseEditor->setVerticalScrollBar(new CoolScrollBar(baseEditor, m_settings));
 
 }
 

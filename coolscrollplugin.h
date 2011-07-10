@@ -6,6 +6,10 @@
 #include <extensionsystem/iplugin.h>
 #include <coreplugin/editormanager/ieditor.h>
 
+#include <QSharedPointer>
+
+class CoolScrollbarSettings;
+
 namespace CoolScroll {
 namespace Internal {
 
@@ -20,6 +24,10 @@ public:
     bool initialize(const QStringList &arguments, QString *errorString);
     void extensionsInitialized();
     ShutdownFlag aboutToShutdown();
+
+private:
+
+    QSharedPointer<CoolScrollbarSettings> m_settings;
 
 private slots:
     void triggerAction();

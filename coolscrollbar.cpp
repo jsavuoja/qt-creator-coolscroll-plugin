@@ -8,9 +8,13 @@
 #include <QDebug>
 #include <texteditor/basetexteditor.h>
 
-CoolScrollBar::CoolScrollBar(TextEditor::BaseTextEditorWidget* edit)
+#include "coolscrollbarsettings.h"
+
+CoolScrollBar::CoolScrollBar(TextEditor::BaseTextEditorWidget* edit,
+                             QSharedPointer<CoolScrollbarSettings>& settings)
     : m_parentEdit(edit)
     , m_scrollBarWidth(70)
+    , m_settings(settings)
 {
 }
 
@@ -68,8 +72,6 @@ void CoolScrollBar::paintEvent(QPaintEvent *event)
     p.setBrush(QBrush(QColor(0, 0, 255, 20)));
     p.drawRect(rect);
     p.end();
-
-    qDebug() << h;
 
    // doc->deleteLater();
 }

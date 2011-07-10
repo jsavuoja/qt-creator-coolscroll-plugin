@@ -8,18 +8,19 @@ namespace TextEditor
     class BaseTextEditorWidget;
 }
 
-class CoolScrollBarSettings;
+class CoolScrollbarSettings;
 
 class CoolScrollBar : public QScrollBar
 {
     Q_OBJECT
 public:
-    CoolScrollBar(TextEditor::BaseTextEditorWidget* edit);
+    CoolScrollBar(TextEditor::BaseTextEditorWidget* edit,
+                  QSharedPointer<CoolScrollbarSettings>& settings);
 
     inline int scrollBarWidth() const { return m_scrollBarWidth; }
     inline void setScrollBarWidth(int w) { m_scrollBarWidth = w; }
 
-    static void setSettings(CoolScrollBarSettings* s) { m_settings = s; }
+    inline const CoolScrollbarSettings& settings() const { return *m_settings; }
 
 protected:
 
@@ -37,7 +38,7 @@ private:
 
     int m_scrollBarWidth;
 
-    static CoolScrollBarSettings* m_settings;
+    const QSharedPointer<CoolScrollbarSettings> m_settings;
 
 };
 
