@@ -22,6 +22,9 @@ public:
 protected:
 
     void paintEvent(QPaintEvent *event);
+    void mousePressEvent(QMouseEvent *event);
+    void mouseMoveEvent(QMouseEvent *event);
+    void contextMenuEvent(QContextMenuEvent *event);
 
     inline const CoolScrollbarSettings& settings() const { return *m_settings; }
 
@@ -39,13 +42,13 @@ protected:
     const QTextDocument& originalDocument() const;
 
     // access to a copy of original document
-    QTextDocument& internalDocument();
-    const QTextDocument& internalDocument() const;
+    inline QTextDocument& internalDocument() { return *m_internalDocument; }
+    inline const QTextDocument& internalDocument() const { return *m_internalDocument; }
 
     void applySettingsToDocument(QTextDocument& doc) const;
     void highlightEntryInDocument(QTextDocument& doc, const QString& str, const QColor& color) const;
 
-    bool eventFilter(QObject *o, QEvent *e);
+    bool eventFilter(QObject *obj, QEvent *e);
 
 protected slots:
 
@@ -55,14 +58,12 @@ protected slots:
 private:
 
     void drawPreview(QPainter& p);
-    void drawPreview2(QPainter &p);
     void drawViewportRect(QPainter& p);
 
     TextEditor::BaseTextEditorWidget* m_parentEdit;
     const QSharedPointer<CoolScrollbarSettings> m_settings;
     qreal m_yAdditionalScale;
     QTextDocument* m_internalDocument;
-    QPixmap m_previewPixmap;
 
     QString m_stringToHighlight;
     bool m_highlightNextSelection;

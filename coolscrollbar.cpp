@@ -50,13 +50,6 @@ void CoolScrollBar::paintEvent(QPaintEvent *event)
 
     p.scale(getXScale(), getYScale());
 
-    // TODO: optimize
-//    if(!m_stringToHighlight.isEmpty())
-//    {
-//        highlightEntryInDocument(internalDocument(), m_stringToHighlight,
-//                                 settings().m_selectionHighlightColor);
-//    }
-
     drawPreview(p);
     drawViewportRect(p);
     p.end();
@@ -139,50 +132,12 @@ qreal CoolScrollBar::getYScale() const
     return settings().m_yDefaultScale * m_yAdditionalScale;
 }
 ////////////////////////////////////////////////////////////////////////////
-void CoolScrollBar::drawPreview2(QPainter &p)
-{
-    QPointF pos(0, 0);
-
-    p.setFont(settings().m_font);
-
-    // text drawing
-    QTextOption opt;
-    opt.setTabStop(8.0);
-    p.setPen(QPen(Qt::black));
-
-    QTextBlock block = originalDocument().firstBlock();
-    int i =0;
-    while(block.isValid())
-    {
-        if(block.isVisible())
-        {
-            QRectF rect;
-//            rect.setTopLeft(pos);
-//            rect.setWidth(2 * settings().m_scrollBarWidth);
-//            rect.setHeight(lineHeight * block.lineCount());
-//            p.drawText(rect, block.text(), opt);
-//            pos.setY(pos.y() + lineHeight * block.lineCount());
-
-            p.setBrush(Qt::red);
-            QTextBlock::Iterator it = block.begin();
-            while (it != block.end())
-            {
-                p.drawText(pos, it.fragment().text());
-                pos.setX(pos.x() + it.fragment().length());
-                ++it;
-            }
-            pos.setY(pos.y() + calculateLineHeight() * block.lineCount());
-            pos.setX(0);
-        }
-        block = block.next();
-    }
-}
-////////////////////////////////////////////////////////////////////////////
 void CoolScrollBar::drawViewportRect(QPainter &p)
 {
     int lineHeight = calculateLineHeight();
     QPointF rectPos(0, value() * lineHeight);
-    QRectF rect(rectPos, QSizeF(settings().m_scrollBarWidth,  linesInViewportCount() * lineHeight));
+    QRectF rect(rectPos, QSizeF(settings().m_scrollBarWidth / getXScale(),
+                                linesInViewportCount() * lineHeight));
 
     p.setBrush(QBrush(settings().m_viewportColor));
     p.drawRect(rect);
@@ -197,16 +152,6 @@ int CoolScrollBar::calculateLineHeight() const
 void CoolScrollBar::drawPreview(QPainter &p)
 {
     internalDocument().drawContents(&p);
-}
-////////////////////////////////////////////////////////////////////////////
-QTextDocument & CoolScrollBar::internalDocument()
-{
-    return *m_internalDocument;
-}
-////////////////////////////////////////////////////////////////////////////
-const QTextDocument & CoolScrollBar::internalDocument() const
-{
-    return *m_internalDocument;
 }
 ////////////////////////////////////////////////////////////////////////////
 void CoolScrollBar::applySettingsToDocument(QTextDocument &doc) const
@@ -235,5 +180,39 @@ void CoolScrollBar::highlightEntryInDocument(QTextDocument & doc, const QString 
         {
             break;
         }
+    }
+}
+////////////////////////////////////////////////////////////////////////////
+void CoolScrollBar::mousePressEvent(QMouseEvent *event)
+{
+    if(event->button() == Qt::LeftButton)
+    {
+        qreal yPos = event->posF().y();
+        qreal documentHeight = internalDocument().lineCount() * calculateLineHeight() * getYScale();
+        int value = int(yPos * maximum() / documentHeight);
+        if(value > maximum())
+            value = maximum();
+        setValue(value);
+    }
+    else if(event->button() == Qt::RightButton)
+    {
+        highlightEntryInDocument(internalDocument(), m_stringToHighlight, Qt::white);
+        update();
+    }
+}
+////////////////////////////////////////////////////////////////////////////
+void CoolScrollBar::contextMenuEvent(QContextMenuEvent *event)
+{
+    if(!settings().m_disableContextMenu)
+    {
+        QScrollBar::contextMenuEvent(event);
+    }
+}
+
+void CoolScrollBar::mouseMoveEvent(QMouseEvent *event)
+{
+    if(event->button() == Qt::LeftButton)
+    {
+
     }
 }

@@ -18,6 +18,7 @@ public:
     qreal m_xDefaultScale;
     qreal m_yDefaultScale;
     QColor m_selectionHighlightColor;
+    bool m_disableContextMenu;
 
 };
 
