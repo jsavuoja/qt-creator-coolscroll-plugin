@@ -2,7 +2,7 @@
 #define COOLSCROLLAREA_H
 
 #include <QtGui/QScrollBar>
-#include <QtGui/QPicture>
+#include <QtGui/QPixmap>
 
 namespace TextEditor
 {
@@ -43,6 +43,7 @@ protected:
     const QTextDocument& internalDocument() const;
 
     void applySettingsToDocument(QTextDocument& doc) const;
+    void highlightEntryInDocument(QTextDocument& doc, const QString& str, const QColor& color) const;
 
     bool eventFilter(QObject *o, QEvent *e);
 
@@ -61,6 +62,7 @@ private:
     const QSharedPointer<CoolScrollbarSettings> m_settings;
     qreal m_yAdditionalScale;
     QTextDocument* m_internalDocument;
+    QPixmap m_previewPixmap;
 
     QString m_stringToHighlight;
     bool m_highlightNextSelection;

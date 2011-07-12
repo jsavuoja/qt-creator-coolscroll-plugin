@@ -51,6 +51,12 @@ void CoolScrollBar::paintEvent(QPaintEvent *event)
     p.scale(getXScale(), getYScale());
 
     // TODO: optimize
+//    if(!m_stringToHighlight.isEmpty())
+//    {
+//        highlightEntryInDocument(internalDocument(), m_stringToHighlight,
+//                                 settings().m_selectionHighlightColor);
+//    }
+
     drawPreview(p);
     drawViewportRect(p);
     p.end();
@@ -94,8 +100,7 @@ const QTextDocument & CoolScrollBar::originalDocument() const
 ////////////////////////////////////////////////////////////////////////////
 void CoolScrollBar::onDocumentContentChanged()
 {
-    delete m_internalDocument;
-    m_internalDocument = originalDocument().clone();
+    internalDocument().setPlainText(originalDocument().toPlainText());
     applySettingsToDocument(internalDocument());
     update();
 }
@@ -104,17 +109,22 @@ void CoolScrollBar::onDocumentSelectionChanged()
 {
     if(m_highlightNextSelection)
     {
+        // clear previous highlight
+        highlightEntryInDocument(internalDocument(), m_stringToHighlight, Qt::white);
         m_stringToHighlight = m_parentEdit->textCursor().selection().toPlainText();
-        qDebug() << m_stringToHighlight;
+        // highlight new selection
+        highlightEntryInDocument(internalDocument(), m_stringToHighlight,
+                                 settings().m_selectionHighlightColor);
+
+        update();
     }
 }
 ////////////////////////////////////////////////////////////////////////////
-bool CoolScrollBar::eventFilter(QObject *o, QEvent *e)
+bool CoolScrollBar::eventFilter(QObject *obj, QEvent *e)
 {
-    if(o == m_parentEdit->viewport())
+    if(obj == m_parentEdit->viewport())
     {
         m_highlightNextSelection = (e->type() == QEvent::MouseButtonDblClick);
-        qDebug() << m_highlightNextSelection << e->type();
     }
     return false;
 }
@@ -186,11 +196,6 @@ int CoolScrollBar::calculateLineHeight() const
 ////////////////////////////////////////////////////////////////////////////
 void CoolScrollBar::drawPreview(QPainter &p)
 {
-    QTextCursor find_cursor = m_internalDocument->find("include");
-    QTextCharFormat format(find_cursor.charFormat());
-    format.setBackground(QBrush(Qt::red));
-    find_cursor.mergeCharFormat(format);
-
     internalDocument().drawContents(&p);
 }
 ////////////////////////////////////////////////////////////////////////////
@@ -208,4 +213,27 @@ void CoolScrollBar::applySettingsToDocument(QTextDocument &doc) const
 {
     doc.setDefaultFont(settings().m_font);
     doc.setDefaultTextOption(settings().m_textOption);
+}
+////////////////////////////////////////////////////////////////////////////
+void CoolScrollBar::highlightEntryInDocument(QTextDocument & doc, const QString &str, const QColor& color) const
+{
+    if(str.isEmpty())
+    {
+        return;
+    }
+    QTextCursor cur_cursor(&doc);
+    while(true)
+    {
+        cur_cursor = doc.find(str, cur_cursor);
+        if(!cur_cursor.isNull())
+        {
+            QTextCharFormat format(cur_cursor.charFormat());
+            format.setBackground(color);
+            cur_cursor.mergeCharFormat(format);
+        }
+        else
+        {
+            break;
+        }
+    }
 }

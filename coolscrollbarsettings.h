@@ -17,6 +17,7 @@ public:
     QColor m_viewportColor;
     qreal m_xDefaultScale;
     qreal m_yDefaultScale;
+    QColor m_selectionHighlightColor;
 
 };
 
