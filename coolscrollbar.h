@@ -3,6 +3,7 @@
 
 #include <QtGui/QScrollBar>
 #include <QtGui/QPixmap>
+#include <QtGui/QPicture>
 
 namespace TextEditor
 {
@@ -22,7 +23,9 @@ public:
 protected:
 
     void paintEvent(QPaintEvent *event);
+    void resizeEvent(QResizeEvent *);
     void mousePressEvent(QMouseEvent *event);
+    void mouseReleaseEvent(QMouseEvent *event);
     void mouseMoveEvent(QMouseEvent *event);
     void contextMenuEvent(QContextMenuEvent *event);
 
@@ -33,7 +36,7 @@ protected:
 
     int unfoldedLinesCount() const;
     int linesInViewportCount() const;
-    int calculateLineHeight() const;
+    qreal calculateLineHeight() const;
 
     qreal getXScale() const;
     qreal getYScale() const;
@@ -60,13 +63,22 @@ private:
     void drawPreview(QPainter& p);
     void drawViewportRect(QPainter& p);
 
+    void updatePicture();
+    void updateScaleFactors();
+
+    int posToValue(qreal pos) const;
+
     TextEditor::BaseTextEditorWidget* m_parentEdit;
     const QSharedPointer<CoolScrollbarSettings> m_settings;
     qreal m_yAdditionalScale;
     QTextDocument* m_internalDocument;
 
+    QPixmap m_previewPic;
+
     QString m_stringToHighlight;
     bool m_highlightNextSelection;
+
+    bool m_leftButtonPressed;
 
 };
 

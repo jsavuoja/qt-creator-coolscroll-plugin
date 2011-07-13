@@ -20,7 +20,8 @@ CoolScrollBar::CoolScrollBar(TextEditor::BaseTextEditorWidget* edit,
     m_parentEdit(edit),
     m_settings(settings),
     m_yAdditionalScale(1.0),
-    m_highlightNextSelection(false)
+    m_highlightNextSelection(false),
+    m_leftButtonPressed(false)
 {
     m_parentEdit->viewport()->installEventFilter(this);
 
@@ -28,6 +29,8 @@ CoolScrollBar::CoolScrollBar(TextEditor::BaseTextEditorWidget* edit,
     applySettingsToDocument(internalDocument());
     connect(m_parentEdit, SIGNAL(textChanged()), SLOT(onDocumentContentChanged()));
     connect(m_parentEdit, SIGNAL(selectionChanged()), SLOT(onDocumentSelectionChanged()));
+
+    updatePicture();
 }
 ////////////////////////////////////////////////////////////////////////////
 void CoolScrollBar::paintEvent(QPaintEvent *event)
@@ -35,22 +38,7 @@ void CoolScrollBar::paintEvent(QPaintEvent *event)
     Q_UNUSED(event)
 
     QPainter p(this);
-
-    p.fillRect(rect(), Qt::white);
-
-    int lineHeight = calculateLineHeight();
-
-    qreal documentHeight = qreal(lineHeight * m_internalDocument->lineCount());
-    documentHeight *= settings().m_yDefaultScale;
-
-    if(documentHeight > size().height())
-    {
-        m_yAdditionalScale = size().height() / documentHeight;
-    }
-
-    p.scale(getXScale(), getYScale());
-
-    drawPreview(p);
+    p.drawPixmap(0, 0, width(), height(), m_previewPic);
     drawViewportRect(p);
     p.end();
 }
@@ -94,7 +82,9 @@ const QTextDocument & CoolScrollBar::originalDocument() const
 void CoolScrollBar::onDocumentContentChanged()
 {
     internalDocument().setPlainText(originalDocument().toPlainText());
-    applySettingsToDocument(internalDocument());
+//    highlightEntryInDocument(internalDocument(), m_stringToHighlight,
+//                             settings().m_selectionHighlightColor);
+    updatePicture();
     update();
 }
 ////////////////////////////////////////////////////////////////////////////
@@ -109,6 +99,7 @@ void CoolScrollBar::onDocumentSelectionChanged()
         highlightEntryInDocument(internalDocument(), m_stringToHighlight,
                                  settings().m_selectionHighlightColor);
 
+        updatePicture();
         update();
     }
 }
@@ -134,19 +125,21 @@ qreal CoolScrollBar::getYScale() const
 ////////////////////////////////////////////////////////////////////////////
 void CoolScrollBar::drawViewportRect(QPainter &p)
 {
-    int lineHeight = calculateLineHeight();
+    qreal lineHeight = calculateLineHeight();
+    lineHeight *= getYScale();
     QPointF rectPos(0, value() * lineHeight);
-    QRectF rect(rectPos, QSizeF(settings().m_scrollBarWidth / getXScale(),
+    QRectF rect(rectPos, QSizeF(settings().m_scrollBarWidth,
                                 linesInViewportCount() * lineHeight));
 
+    p.setPen(Qt::NoPen);
     p.setBrush(QBrush(settings().m_viewportColor));
     p.drawRect(rect);
 }
 ////////////////////////////////////////////////////////////////////////////
-int CoolScrollBar::calculateLineHeight() const
+qreal CoolScrollBar::calculateLineHeight() const
 {
     QFontMetrics fm(settings().m_font);
-    return fm.height();
+    return qreal(fm.height());
 }
 ////////////////////////////////////////////////////////////////////////////
 void CoolScrollBar::drawPreview(QPainter &p)
@@ -187,16 +180,13 @@ void CoolScrollBar::mousePressEvent(QMouseEvent *event)
 {
     if(event->button() == Qt::LeftButton)
     {
-        qreal yPos = event->posF().y();
-        qreal documentHeight = internalDocument().lineCount() * calculateLineHeight() * getYScale();
-        int value = int(yPos * maximum() / documentHeight);
-        if(value > maximum())
-            value = maximum();
-        setValue(value);
+        setValue(posToValue(event->posF().y()));
+        m_leftButtonPressed = true;
     }
     else if(event->button() == Qt::RightButton)
     {
         highlightEntryInDocument(internalDocument(), m_stringToHighlight, Qt::white);
+        updatePicture();
         update();
     }
 }
@@ -211,8 +201,66 @@ void CoolScrollBar::contextMenuEvent(QContextMenuEvent *event)
 
 void CoolScrollBar::mouseMoveEvent(QMouseEvent *event)
 {
+    if(m_leftButtonPressed)
+    {
+        setValue(posToValue(event->posF().y()));
+    }
+}
+////////////////////////////////////////////////////////////////////////////
+void CoolScrollBar::updatePicture()
+{
+    updateScaleFactors();
+    m_previewPic = QPixmap(width() / getXScale(), height() / getYScale());
+    m_previewPic.fill(Qt::white);
+    QPainter pic(&m_previewPic);
+    drawPreview(pic);
+    pic.end();
+
+    // scale pixmap with bilinear filtering
+    m_previewPic = m_previewPic.scaled(width(), height(), Qt::IgnoreAspectRatio,
+                                       Qt::SmoothTransformation);
+}
+////////////////////////////////////////////////////////////////////////////
+void CoolScrollBar::updateScaleFactors()
+{
+    int lineHeight = calculateLineHeight();
+
+    qreal documentHeight = qreal(lineHeight * m_internalDocument->lineCount());
+    documentHeight *= settings().m_yDefaultScale;
+
+    if(documentHeight > size().height())
+    {
+        m_yAdditionalScale = size().height() / documentHeight;
+    }
+}
+////////////////////////////////////////////////////////////////////////////
+void CoolScrollBar::resizeEvent(QResizeEvent *)
+{
+    updatePicture();
+}
+////////////////////////////////////////////////////////////////////////////
+int CoolScrollBar::posToValue(qreal pos) const
+{
+    qreal documentHeight = internalDocument().lineCount() * calculateLineHeight() * getYScale();
+    int value = int(pos * (maximum() + linesInViewportCount()) / documentHeight);
+
+    // set center of viewport to position of click
+    value -= linesInViewportCount() / 2;
+    if(value > maximum())
+    {
+        value = maximum();
+    }
+    else if (value < minimum())
+    {
+        value = minimum();
+    }
+    return value;
+}
+////////////////////////////////////////////////////////////////////////////
+void CoolScrollBar::mouseReleaseEvent(QMouseEvent *event)
+{
     if(event->button() == Qt::LeftButton)
     {
-
+        m_leftButtonPressed = false;
     }
 }
