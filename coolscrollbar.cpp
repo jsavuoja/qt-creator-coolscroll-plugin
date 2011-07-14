@@ -165,7 +165,15 @@ qreal CoolScrollBar::calculateLineHeight() const
 ////////////////////////////////////////////////////////////////////////////
 void CoolScrollBar::drawPreview(QPainter &p)
 {
-    internalDocument().drawContents(&p);
+    //internalDocument().drawContents(&p);
+    QTextBlock block = internalDocument().begin();
+    QPointF pos(0.0f, 0.0f);
+    while(block.isValid())
+    {
+        block.layout()->draw(&p, pos, block.layout()->additionalFormats().toVector());
+        pos += QPointF(0, block.lineCount() * calculateLineHeight());
+        block = block.next();
+    }
 }
 ////////////////////////////////////////////////////////////////////////////
 void CoolScrollBar::applySettingsToDocument(QTextDocument &doc) const
