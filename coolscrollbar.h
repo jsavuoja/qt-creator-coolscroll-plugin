@@ -3,7 +3,7 @@
 
 #include <QtGui/QScrollBar>
 #include <QtGui/QPixmap>
-#include <QtGui/QPicture>
+#include <QTextCharFormat>
 
 namespace TextEditor
 {
@@ -49,7 +49,6 @@ protected:
     inline const QTextDocument& internalDocument() const { return *m_internalDocument; }
 
     void applySettingsToDocument(QTextDocument& doc) const;
-    void highlightEntryInDocument(QTextDocument& doc, const QString& str, const QColor& color) const;
 
     bool eventFilter(QObject *obj, QEvent *e);
 
@@ -67,6 +66,10 @@ private:
     void updateScaleFactors();
 
     int posToValue(qreal pos) const;
+
+    void highlightSelectedWord();
+    void clearHighlight();
+    void highlightEntryInDocument(const QString& str, const QTextCharFormat& format);
 
     TextEditor::BaseTextEditorWidget* m_parentEdit;
     const QSharedPointer<CoolScrollbarSettings> m_settings;

@@ -115,11 +115,10 @@ void CoolScrollBar::onDocumentSelectionChanged()
     if(m_highlightNextSelection)
     {
         // clear previous highlight
-        highlightEntryInDocument(internalDocument(), m_stringToHighlight, Qt::white);
+        clearHighlight();
         m_stringToHighlight = m_parentEdit->textCursor().selection().toPlainText();
         // highlight new selection
-        highlightEntryInDocument(internalDocument(), m_stringToHighlight,
-                                 settings().m_selectionHighlightColor);
+        highlightSelectedWord();
 
         updatePicture();
         update();
@@ -175,20 +174,18 @@ void CoolScrollBar::applySettingsToDocument(QTextDocument &doc) const
     doc.setDefaultTextOption(settings().m_textOption);
 }
 ////////////////////////////////////////////////////////////////////////////
-void CoolScrollBar::highlightEntryInDocument(QTextDocument & doc, const QString &str, const QColor& color) const
+void CoolScrollBar::highlightEntryInDocument(const QString& str, const QTextCharFormat& format)
 {
     if(str.isEmpty())
     {
         return;
     }
-    QTextCursor cur_cursor(&doc);
+    QTextCursor cur_cursor(&internalDocument());
     while(true)
     {
-        cur_cursor = doc.find(str, cur_cursor);
+        cur_cursor = internalDocument().find(str, cur_cursor);
         if(!cur_cursor.isNull())
         {
-            QTextCharFormat format(cur_cursor.charFormat());
-            format.setBackground(color);
             cur_cursor.mergeCharFormat(format);
         }
         else
@@ -207,7 +204,7 @@ void CoolScrollBar::mousePressEvent(QMouseEvent *event)
     }
     else if(event->button() == Qt::RightButton)
     {
-        highlightEntryInDocument(internalDocument(), m_stringToHighlight, Qt::white);
+        clearHighlight();
         updatePicture();
         update();
     }
@@ -285,4 +282,23 @@ void CoolScrollBar::mouseReleaseEvent(QMouseEvent *event)
     {
         m_leftButtonPressed = false;
     }
+}
+////////////////////////////////////////////////////////////////////////////
+void CoolScrollBar::highlightSelectedWord()
+{
+    QTextCharFormat format;
+    format.setBackground(settings().m_selectionHighlightColor);
+    QFont font = settings().m_font;
+    font.setPointSizeF(font.pointSizeF() * 2.0);
+    format.setFont(font);
+    highlightEntryInDocument(m_stringToHighlight, format);
+
+}
+////////////////////////////////////////////////////////////////////////////
+void CoolScrollBar::clearHighlight()
+{
+    QTextCharFormat format;
+    format.setBackground(Qt::white);
+    format.setFont(settings().m_font);
+    highlightEntryInDocument(m_stringToHighlight, format);
 }
