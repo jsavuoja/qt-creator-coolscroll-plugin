@@ -84,28 +84,13 @@ void CoolScrollBar::onDocumentContentChanged()
     internalDocument().setPlainText(originalDocument().toPlainText());
     QTextBlock origBlock = originalDocument().firstBlock();
     QTextBlock internBlock = internalDocument().firstBlock();
-    int globalLen = 0;
 
     while(origBlock.isValid() && internBlock.isValid())
     {
-        QList<QTextLayout::FormatRange> formats = origBlock.layout()->additionalFormats();
-        QList<QTextLayout::FormatRange>::iterator it = formats.begin();
-        qDebug() << "next layout";
-        while(it != formats.end())
-        {
-           // (*it).format.setBackground((*it).format.foreground().color());
-            qDebug() << "format : " << (*it).start << (*it).length;
-            globalLen += (*it).length;
-            it++;
-        }
-
-        internBlock.layout()->setAdditionalFormats(formats);
+        internBlock.layout()->setAdditionalFormats(origBlock.layout()->additionalFormats());
         origBlock = origBlock.next();
         internBlock = internBlock.next();
     }
-    qDebug() << "goablalen = " << globalLen << internalDocument().toPlainText().size();
-        highlightEntryInDocument(internalDocument(), m_stringToHighlight,
-                                 settings().m_selectionHighlightColor);
     updatePicture();
     update();
 }
