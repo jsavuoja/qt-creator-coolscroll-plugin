@@ -71,7 +71,7 @@ private:
 
     void highlightSelectedWord();
     void clearHighlight();
-    void highlightEntryInDocument(const QString& str, const QTextCharFormat& format);
+    void highlightEntryInDocument(const QString& str);
 
     TextEditor::BaseTextEditorWidget* m_parentEdit;
     const QSharedPointer<CoolScrollbarSettings> m_settings;

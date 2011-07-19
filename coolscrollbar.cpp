@@ -194,7 +194,7 @@ void CoolScrollBar::applySettingsToDocument(QTextDocument &doc) const
     doc.setDefaultTextOption(settings().m_textOption);
 }
 ////////////////////////////////////////////////////////////////////////////
-void CoolScrollBar::highlightEntryInDocument(const QString& str, const QTextCharFormat& format)
+void CoolScrollBar::highlightEntryInDocument(const QString& str)
 {
     if(str.isEmpty())
     {
@@ -340,12 +340,7 @@ void CoolScrollBar::mouseReleaseEvent(QMouseEvent *event)
 ////////////////////////////////////////////////////////////////////////////
 void CoolScrollBar::highlightSelectedWord()
 {
-    QTextCharFormat format;
-    format.setBackground(settings().m_selectionHighlightColor);
-    QFont font = settings().m_font;
-    font.setPointSizeF(font.pointSizeF() * 1.1);
-    format.setFont(font);
-    highlightEntryInDocument(m_stringToHighlight, format);
+    highlightEntryInDocument(m_stringToHighlight);
 }
 ////////////////////////////////////////////////////////////////////////////
 void CoolScrollBar::clearHighlight()
