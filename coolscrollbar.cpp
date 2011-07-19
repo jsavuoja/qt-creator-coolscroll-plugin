@@ -1,3 +1,32 @@
+/*
+*
+* Copyright (C) 2011 EgorZhuk
+*
+* Authors: Egor Zhuk <egor.zhuk@gmail.com>
+*
+* This file is part of CoolScroll plugin for QtCreator.
+*
+* Permission is hereby granted, free of charge, to any person obtaining
+* a copy of this software and associated documentation files (the
+* "Software"), to deal in the Software without restriction, including
+* without limitation the rights to use, copy, modify, merge, publish,
+* distribute, sublicense, and/or sell copies of the Software, and to
+* permit persons to whom the Software is furnished to do so, subject to
+* the following conditions:
+*
+* The above copyright notice and this permission notice shall be
+* included in all copies or substantial portions of the Software.
+*
+* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+* EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+* MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+* NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+* LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+* OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+* WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+*
+*/
+
 #include "coolscrollbar.h"
 #include <QtGui/QPlainTextEdit>
 #include <QtGui/QTextBlock>
@@ -6,6 +35,9 @@
 
 #include <QtGui/QPainter>
 #include <QtGui/QStyle>
+#include <QFuture>
+#include <QtConcurrentRun>
+#include <QApplication>
 #include <QDebug>
 
 #include <texteditor/basetexteditor.h>
@@ -82,17 +114,18 @@ const QTextDocument & CoolScrollBar::originalDocument() const
 void CoolScrollBar::onDocumentContentChanged()
 {
     internalDocument().setPlainText(originalDocument().toPlainText());
-    QTextBlock origBlock = originalDocument().firstBlock();
-    QTextBlock internBlock = internalDocument().firstBlock();
 
-    while(origBlock.isValid() && internBlock.isValid())
-    {
-        internBlock.layout()->setAdditionalFormats(origBlock.layout()->additionalFormats());
-        origBlock = origBlock.next();
-        internBlock = internBlock.next();
-    }
-    updatePicture();
-    update();
+// TODO: make optional
+//    QTextBlock origBlock = originalDocument().firstBlock();
+//    QTextBlock internBlock = internalDocument().firstBlock();
+//    while(origBlock.isValid() && internBlock.isValid())
+//    {
+//        internBlock.layout()->setAdditionalFormats(origBlock.layout()->additionalFormats());
+//        origBlock = origBlock.next();
+//        internBlock = internBlock.next();
+//    }
+ //   updatePicture();
+   // update();
 }
 ////////////////////////////////////////////////////////////////////////////
 void CoolScrollBar::onDocumentSelectionChanged()
@@ -148,17 +181,9 @@ qreal CoolScrollBar::calculateLineHeight() const
     return qreal(fm.height());
 }
 ////////////////////////////////////////////////////////////////////////////
-void CoolScrollBar::drawPreview(QPainter &p)
+void CoolScrollBar::drawPreview(QPainter& p)
 {
-    //internalDocument().drawContents(&p);
-    QTextBlock block = internalDocument().begin();
-    QPointF pos(0.0f, 0.0f);
-    while(block.isValid())
-    {
-        block.layout()->draw(&p, pos, block.layout()->additionalFormats().toVector());
-        pos += QPointF(0, block.lineCount() * calculateLineHeight());
-        block = block.next();
-    }
+    internalDocument().drawContents(&p);
 }
 ////////////////////////////////////////////////////////////////////////////
 void CoolScrollBar::applySettingsToDocument(QTextDocument &doc) const
@@ -174,6 +199,7 @@ void CoolScrollBar::highlightEntryInDocument(const QString& str, const QTextChar
         return;
     }
     QTextCursor cur_cursor(&internalDocument());
+    int numIter = 0;
     while(true)
     {
         cur_cursor = internalDocument().find(str, cur_cursor);
@@ -184,6 +210,12 @@ void CoolScrollBar::highlightEntryInDocument(const QString& str, const QTextChar
         else
         {
             break;
+        }
+        // prevents UI freezing
+        ++numIter;
+        if(numIter % 10)
+        {
+            qApp->processEvents();
         }
     }
 }
@@ -282,7 +314,7 @@ void CoolScrollBar::highlightSelectedWord()
     QTextCharFormat format;
     format.setBackground(settings().m_selectionHighlightColor);
     QFont font = settings().m_font;
-    font.setPointSizeF(font.pointSizeF() * 2.0);
+    font.setPointSizeF(font.pointSizeF() * 1.1);
     format.setFont(font);
     highlightEntryInDocument(m_stringToHighlight, format);
 
@@ -294,4 +326,5 @@ void CoolScrollBar::clearHighlight()
     format.setBackground(Qt::white);
     format.setFont(settings().m_font);
     highlightEntryInDocument(m_stringToHighlight, format);
+
 }

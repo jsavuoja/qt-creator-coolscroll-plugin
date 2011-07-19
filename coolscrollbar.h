@@ -63,6 +63,7 @@ private:
     void drawViewportRect(QPainter& p);
 
     void updatePicture();
+
     void updateScaleFactors();
 
     int posToValue(qreal pos) const;
