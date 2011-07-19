@@ -72,6 +72,8 @@ void CoolScrollBar::paintEvent(QPaintEvent *event)
     QPainter p(this);
     p.drawPixmap(0, 0, width(), height(), m_previewPic);
 
+    p.scale(getXScale(), getYScale());
+
     drawSelections(p);
     drawViewportRect(p);
     p.end();
@@ -134,14 +136,18 @@ void CoolScrollBar::onDocumentSelectionChanged()
 {
     if(m_highlightNextSelection)
     {
-        // clear previous highlight
-        clearHighlight();
-        m_stringToHighlight = m_parentEdit->textCursor().selection().toPlainText();
-        // highlight new selection
-        highlightSelectedWord();
+        QString selectedStr = m_parentEdit->textCursor().selection().toPlainText();
+        if(selectedStr != m_stringToHighlight)
+        {
+            // clear previous highlight
+            clearHighlight();
+            m_stringToHighlight = selectedStr;
+            // highlight new selection
+            highlightSelectedWord();
 
-        updatePicture();
-        update();
+            updatePicture();
+            update();
+        }
     }
 }
 ////////////////////////////////////////////////////////////////////////////
@@ -167,9 +173,8 @@ qreal CoolScrollBar::getYScale() const
 void CoolScrollBar::drawViewportRect(QPainter &p)
 {
     qreal lineHeight = calculateLineHeight();
-    lineHeight *= getYScale();
     QPointF rectPos(0, value() * lineHeight);
-    QRectF rect(rectPos, QSizeF(settings().m_scrollBarWidth,
+    QRectF rect(rectPos, QSizeF(settings().m_scrollBarWidth / getXScale(),
                                 linesInViewportCount() * lineHeight));
 
     p.setPen(Qt::NoPen);
@@ -204,6 +209,7 @@ void CoolScrollBar::highlightEntryInDocument(const QString& str)
     m_selectionRects.clear();
     QTextCursor cur_cursor(&internalDocument());
     int numIter = 0;
+    qreal yScale = getYScale();
     while(true)
     {
         cur_cursor = internalDocument().find(str, cur_cursor);
@@ -221,17 +227,13 @@ void CoolScrollBar::highlightEntryInDocument(const QString& str)
 
             selectionRect.setLeft(line.naturalTextWidth() * leftPercent);
             selectionRect.setRight(line.naturalTextWidth() * rightPercent);
-            // apply current scale
-            QPointF pos = layout->position();
-            pos.setX(pos.x() * getXScale());
-            pos.setY(pos.y() * getYScale());
-            selectionRect.translate(pos);
-            selectionRect.setHeight(selectionRect.height() * getYScale());
+
+            selectionRect.translate(layout->position());
 
             // apply minimum selection height for good visibility on large files
-            if(selectionRect.height() < settings().m_minSelectionHeight)
+            if((selectionRect.height() * yScale) < settings().m_minSelectionHeight)
             {
-                selectionRect.setHeight(settings().m_minSelectionHeight);
+                selectionRect.setHeight(settings().m_minSelectionHeight / yScale);
             }
 
             m_selectionRects.push_back(selectionRect);
@@ -242,7 +244,7 @@ void CoolScrollBar::highlightEntryInDocument(const QString& str)
         }
         // prevents UI freezing
         ++numIter;
-        if(numIter % 20)
+        if(numIter % 15 == 0)
         {
             qApp->processEvents();
         }
@@ -253,13 +255,12 @@ void CoolScrollBar::mousePressEvent(QMouseEvent *event)
 {
     if(event->button() == Qt::LeftButton)
     {
-        setValue(posToValue(event->posF().y()));
+        setValue(posToScrollValue(event->posF().y()));
         m_leftButtonPressed = true;
     }
     else if(event->button() == Qt::RightButton)
     {
         clearHighlight();
-        updatePicture();
         update();
     }
 }
@@ -271,12 +272,12 @@ void CoolScrollBar::contextMenuEvent(QContextMenuEvent *event)
         QScrollBar::contextMenuEvent(event);
     }
 }
-
+////////////////////////////////////////////////////////////////////////////
 void CoolScrollBar::mouseMoveEvent(QMouseEvent *event)
 {
     if(m_leftButtonPressed)
     {
-        setValue(posToValue(event->posF().y()));
+        setValue(posToScrollValue(event->posF().y()));
     }
 }
 ////////////////////////////////////////////////////////////////////////////
@@ -312,12 +313,12 @@ void CoolScrollBar::resizeEvent(QResizeEvent *)
     updatePicture();
 }
 ////////////////////////////////////////////////////////////////////////////
-int CoolScrollBar::posToValue(qreal pos) const
+int CoolScrollBar::posToScrollValue(qreal pos) const
 {
     qreal documentHeight = internalDocument().lineCount() * calculateLineHeight() * getYScale();
     int value = int(pos * (maximum() + linesInViewportCount()) / documentHeight);
 
-    // set center of viewport to position of click
+    // set center of a viewport to position of click
     value -= linesInViewportCount() / 2;
     if(value > maximum())
     {
