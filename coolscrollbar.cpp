@@ -71,6 +71,8 @@ void CoolScrollBar::paintEvent(QPaintEvent *event)
 
     QPainter p(this);
     p.drawPixmap(0, 0, width(), height(), m_previewPic);
+
+    drawSelections(p);
     drawViewportRect(p);
     p.end();
 }
@@ -198,6 +200,8 @@ void CoolScrollBar::highlightEntryInDocument(const QString& str, const QTextChar
     {
         return;
     }
+    // TODO: optimize using QVector::reserve()
+    m_selectionRects.clear();
     QTextCursor cur_cursor(&internalDocument());
     int numIter = 0;
     while(true)
@@ -205,7 +209,32 @@ void CoolScrollBar::highlightEntryInDocument(const QString& str, const QTextChar
         cur_cursor = internalDocument().find(str, cur_cursor);
         if(!cur_cursor.isNull())
         {
-            cur_cursor.mergeCharFormat(format);
+            const QTextLayout* layout = cur_cursor.block().layout();
+            QTextLine line = layout->lineForTextPosition(cur_cursor.positionInBlock());
+
+            QRectF selectionRect = line.naturalTextRect();
+            // calculate bounding rect for selected word
+            int blockPos = cur_cursor.block().position();
+
+            qreal leftPercent = qreal(cur_cursor.selectionStart() - blockPos) / line.textLength();
+            qreal rightPercent = qreal(cur_cursor.selectionEnd() - blockPos) / line.textLength();
+
+            selectionRect.setLeft(line.naturalTextWidth() * leftPercent);
+            selectionRect.setRight(line.naturalTextWidth() * rightPercent);
+            // apply current scale
+            QPointF pos = layout->position();
+            pos.setX(pos.x() * getXScale());
+            pos.setY(pos.y() * getYScale());
+            selectionRect.translate(pos);
+            selectionRect.setHeight(selectionRect.height() * getYScale());
+
+            // apply minimum selection height for good visibility on large files
+            if(selectionRect.height() < settings().m_minSelectionHeight)
+            {
+                selectionRect.setHeight(settings().m_minSelectionHeight);
+            }
+
+            m_selectionRects.push_back(selectionRect);
         }
         else
         {
@@ -213,7 +242,7 @@ void CoolScrollBar::highlightEntryInDocument(const QString& str, const QTextChar
         }
         // prevents UI freezing
         ++numIter;
-        if(numIter % 10)
+        if(numIter % 20)
         {
             qApp->processEvents();
         }
@@ -317,14 +346,17 @@ void CoolScrollBar::highlightSelectedWord()
     font.setPointSizeF(font.pointSizeF() * 1.1);
     format.setFont(font);
     highlightEntryInDocument(m_stringToHighlight, format);
-
 }
 ////////////////////////////////////////////////////////////////////////////
 void CoolScrollBar::clearHighlight()
 {
-    QTextCharFormat format;
-    format.setBackground(Qt::white);
-    format.setFont(settings().m_font);
-    highlightEntryInDocument(m_stringToHighlight, format);
-
+    m_selectionRects.clear();
+    update();
+}
+////////////////////////////////////////////////////////////////////////////
+void CoolScrollBar::drawSelections(QPainter &p)
+{
+    p.setBrush(settings().m_selectionHighlightColor);
+    p.setPen(Qt::NoPen);
+    p.drawRects(m_selectionRects);
 }

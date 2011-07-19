@@ -60,6 +60,7 @@ protected slots:
 private:
 
     void drawPreview(QPainter& p);
+    void drawSelections(QPainter& p);
     void drawViewportRect(QPainter& p);
 
     void updatePicture();
@@ -83,6 +84,8 @@ private:
     bool m_highlightNextSelection;
 
     bool m_leftButtonPressed;
+
+    QVector<QRectF> m_selectionRects;
 
 };
 

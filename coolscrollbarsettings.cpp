@@ -36,16 +36,14 @@ CoolScrollbarSettings::CoolScrollbarSettings() :
     m_xDefaultScale(0.9),
     m_yDefaultScale(0.7),
     m_selectionHighlightColor(Qt::red),
-    m_disableContextMenu(true)
+    m_disableContextMenu(true),
+    m_minSelectionHeight(1.5)
 {
     m_font.setPointSizeF(1.5);
     m_font.setStyleHint(QFont::Monospace);
     m_font.setFamily("inconsolata");
-
     m_font.setBold(true);
-   // m_font.setStretch(QFont::UltraCondensed);
     m_font.setStyleStrategy(QFont::NoAntialias);
-    //m_font.setCapitalization(QFont::AllUppercase);
 
     m_textOption.setTabStop(2.0);
 }
