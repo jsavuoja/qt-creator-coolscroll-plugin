@@ -347,6 +347,7 @@ void CoolScrollBar::highlightSelectedWord()
 void CoolScrollBar::clearHighlight()
 {
     m_selectionRects.clear();
+    m_stringToHighlight.clear();
     update();
 }
 ////////////////////////////////////////////////////////////////////////////
