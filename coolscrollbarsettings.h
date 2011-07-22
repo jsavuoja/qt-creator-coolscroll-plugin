@@ -32,7 +32,8 @@
 
 #include <QtGui/QFont>
 #include <QtGui/QColor>
-#include <QPointF>
+#include <QSettings>
+
 #include <QTextOption>
 
 struct CoolScrollbarSettings
@@ -40,15 +41,20 @@ struct CoolScrollbarSettings
 public:
     CoolScrollbarSettings();
 
-    int m_scrollBarWidth;
+    void save(QSettings* settings);
+    void read(const QSettings* settings);
+
+    int scrollBarWidth;
+    QColor viewportColor;
+    QColor selectionHighlightColor;
+    qreal xDefaultScale;
+    qreal yDefaultScale;
+    bool disableContextMenu;
+
+    // this options cannot be changed by user
     QFont m_font;
-    QTextOption m_textOption;
-    QColor m_viewportColor;
-    qreal m_xDefaultScale;
-    qreal m_yDefaultScale;
-    QColor m_selectionHighlightColor;
-    bool m_disableContextMenu;
     qreal m_minSelectionHeight;
+    QTextOption m_textOption;
 
 };
 

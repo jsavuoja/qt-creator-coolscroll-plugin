@@ -26,17 +26,25 @@
 * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 *
 */
-
-
 #include "coolscrollbarsettings.h"
 
+namespace
+{
+    const QString l_nWidth("scrollbar_width");
+    const QString l_nVieportColor("vieport_color");
+    const QString l_nSelectionColor("selection_color");
+    const QString l_nXScale("x_default_scale");
+    const QString l_nYScale("y_default_scale");
+    const QString l_nContextMenu("disable_context_menu");
+}
+
 CoolScrollbarSettings::CoolScrollbarSettings() :
-    m_scrollBarWidth(70),
-    m_viewportColor(QColor(0, 0, 255, 20)),
-    m_xDefaultScale(0.9),
-    m_yDefaultScale(0.7),
-    m_selectionHighlightColor(Qt::red),
-    m_disableContextMenu(true),
+    scrollBarWidth(70),
+    viewportColor(QColor(0, 0, 255, 20)),
+    selectionHighlightColor(Qt::red),
+    xDefaultScale(0.9),
+    yDefaultScale(0.7),
+    disableContextMenu(true),
     m_minSelectionHeight(1.5)
 {
     m_font.setPointSizeF(1.5);
@@ -46,4 +54,28 @@ CoolScrollbarSettings::CoolScrollbarSettings() :
     m_font.setStyleStrategy(QFont::NoAntialias);
 
     m_textOption.setTabStop(2.0);
+}
+
+void CoolScrollbarSettings::save(QSettings *settings)
+{
+    settings->setValue(l_nWidth, scrollBarWidth);
+    settings->setValue(l_nVieportColor, viewportColor);
+    settings->setValue(l_nSelectionColor, selectionHighlightColor);
+    settings->setValue(l_nXScale, xDefaultScale);
+    settings->setValue(l_nYScale, yDefaultScale);
+    settings->setValue(l_nContextMenu, disableContextMenu);
+}
+
+void CoolScrollbarSettings::read(const QSettings *settings)
+{
+    scrollBarWidth = settings->value(l_nWidth, scrollBarWidth).toInt();
+    viewportColor = settings->value(l_nVieportColor, QVariant(viewportColor)).
+                                    value<QColor>();
+    selectionHighlightColor = settings->value(l_nSelectionColor,
+                                              QVariant(selectionHighlightColor)).
+                                              value<QColor>();
+
+    xDefaultScale = settings->value(l_nXScale, xDefaultScale).toDouble();
+    yDefaultScale = settings->value(l_nYScale, yDefaultScale).toDouble();
+    disableContextMenu = settings->value(l_nContextMenu, disableContextMenu).toBool();
 }

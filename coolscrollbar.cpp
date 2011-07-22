@@ -106,12 +106,12 @@ int CoolScrollBar::linesInViewportCount() const
 ////////////////////////////////////////////////////////////////////////////
 QSize CoolScrollBar::sizeHint() const
 {
-    return QSize(settings().m_scrollBarWidth, 0);
+    return QSize(settings().scrollBarWidth, 0);
 }
 ////////////////////////////////////////////////////////////////////////////
 QSize CoolScrollBar::minimumSizeHint() const
 {
-    return QSize(settings().m_scrollBarWidth, 0);
+    return QSize(settings().scrollBarWidth, 0);
 }
 ////////////////////////////////////////////////////////////////////////////
 const QTextDocument & CoolScrollBar::originalDocument() const
@@ -119,7 +119,7 @@ const QTextDocument & CoolScrollBar::originalDocument() const
     return *m_parentEdit->document();
 }
 ////////////////////////////////////////////////////////////////////////////
-void CoolScrollBar::onDocumentContentChanged()
+void CoolScrollBar::documentContentChanged()
 {
     internalDocument().setPlainText(originalDocument().toPlainText());
 
@@ -136,7 +136,7 @@ void CoolScrollBar::onDocumentContentChanged()
    // update();
 }
 ////////////////////////////////////////////////////////////////////////////
-void CoolScrollBar::onDocumentSelectionChanged()
+void CoolScrollBar::documentSelectionChanged()
 {
     if(m_highlightNextSelection)
     {
@@ -271,7 +271,7 @@ void CoolScrollBar::mousePressEvent(QMouseEvent *event)
 ////////////////////////////////////////////////////////////////////////////
 void CoolScrollBar::contextMenuEvent(QContextMenuEvent *event)
 {
-    if(!settings().m_disableContextMenu)
+    if(!settings().disableContextMenu)
     {
         QScrollBar::contextMenuEvent(event);
     }
@@ -304,7 +304,7 @@ void CoolScrollBar::updateScaleFactors()
     int lineHeight = calculateLineHeight();
 
     qreal documentHeight = qreal(lineHeight * m_internalDocument->lineCount());
-    documentHeight *= settings().m_yDefaultScale;
+    documentHeight *= settings().yDefaultScale;
 
     if(documentHeight > size().height())
     {
@@ -357,7 +357,17 @@ void CoolScrollBar::clearHighlight()
 ////////////////////////////////////////////////////////////////////////////
 void CoolScrollBar::drawSelections(QPainter &p)
 {
-    p.setBrush(settings().m_selectionHighlightColor);
+    p.setBrush(settings().selectionHighlightColor);
     p.setPen(Qt::NoPen);
     p.drawRects(m_selectionRects);
+}
+////////////////////////////////////////////////////////////////////////////
+void CoolScrollBar::fullUpdateSettings()
+{
+    m_stateDirty = false;
+    resize(settings().scrollBarWidth, height());
+    updateGeometry();
+    applySettingsToDocument(internalDocument());
+    updatePicture();
+    update();
 }
