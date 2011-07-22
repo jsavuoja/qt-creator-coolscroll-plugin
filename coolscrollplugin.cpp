@@ -40,25 +40,27 @@
 
 #include <texteditor/basetexteditor.h>
 
-#include <QtGui/QAction>
-#include <QtGui/QMessageBox>
 #include <QtGui/QMainWindow>
-#include <QtGui/QMenu>
 #include <QtGui/QScrollBar>
 #include <QtGui/QPushButton>
-#include <QtGui/QTextBlock>
 
 #include <QtCore/QtPlugin>
 
 #include "coolscrollbarsettings.h"
 #include "coolscrollbar.h"
+#include "settingspage.h"
+
+namespace
+{
+    const QString l_nSettingsGroup("CoolScroll");
+}
 
 using namespace CoolScroll::Internal;
 
 CoolScrollPlugin::CoolScrollPlugin() :
     m_settings(new CoolScrollbarSettings)
 {
-    // Create your members
+    readSettings();
 }
 
 CoolScrollPlugin::~CoolScrollPlugin()
@@ -69,31 +71,16 @@ CoolScrollPlugin::~CoolScrollPlugin()
 
 bool CoolScrollPlugin::initialize(const QStringList &arguments, QString *errorString)
 {
-    // Register objects in the plugin manager's object pool
-    // Load settings
-    // Add actions to menus
-    // connect to other plugins' signals
-    // "In the initialize method, a plugin can be sure that the plugins it
-    //  depends on have initialized their members."
+    Q_UNUSED(arguments);
+    Q_UNUSED(errorString);
 
-    Q_UNUSED(arguments)
-    Q_UNUSED(errorString)
-    Core::ActionManager *am = Core::ICore::instance()->actionManager();
-
-    QAction *action = new QAction(tr("CoolScroll action"), this);
-    Core::Command *cmd = am->registerAction(action, Constants::ACTION_ID,
-                         Core::Context(Core::Constants::C_GLOBAL));
-    cmd->setDefaultKeySequence(QKeySequence(tr("Ctrl+Alt+Meta+A")));
-    connect(action, SIGNAL(triggered()), this, SLOT(triggerAction()));
-
-    Core::ActionContainer *menu = am->createMenu(Constants::MENU_ID);
-    menu->menu()->setTitle(tr("CoolScroll"));
-    menu->addAction(cmd);
-    am->actionContainer(Core::Constants::M_TOOLS)->addMenu(menu);
+    SettingsPage* settingsPage = new SettingsPage(m_settings);
+    connect(settingsPage, SIGNAL(settingsChanged()), SLOT(settingChanged()));
+    addAutoReleasedObject(settingsPage);
 
     Core::EditorManager* em = Core::ICore::instance()->editorManager();
     connect(em, SIGNAL(editorCreated(Core::IEditor*,QString)),
-                SLOT(on_editorCreated(Core::IEditor*,QString)));
+                SLOT(editorCreated(Core::IEditor*,QString)));
 
     return true;
 }
@@ -113,15 +100,9 @@ ExtensionSystem::IPlugin::ShutdownFlag CoolScrollPlugin::aboutToShutdown()
     return SynchronousShutdown;
 }
 
-void CoolScrollPlugin::triggerAction()
+void CoolScrollPlugin::editorCreated(Core::IEditor *editor, const QString &fileName)
 {
-    QMessageBox::information(Core::ICore::instance()->mainWindow(),
-                             tr("Action triggered"),
-                             tr("This is an action from CoolScroll."));
-}
-
-void CoolScrollPlugin::on_editorCreated(Core::IEditor *editor, const QString &fileName)
-{
+    Q_UNUSED(fileName);
     TextEditor::BaseTextEditorWidget* baseEditor = qobject_cast<TextEditor::BaseTextEditorWidget*>
                                                    (editor->widget());
 
@@ -129,6 +110,49 @@ void CoolScrollPlugin::on_editorCreated(Core::IEditor *editor, const QString &fi
 
 }
 
+void CoolScroll::Internal::CoolScrollPlugin::readSettings()
+{
+    QSettings *settings = Core::ICore::instance()->settings();
+    settings->beginGroup(l_nSettingsGroup);
+    m_settings->read(settings);
+    settings->endGroup();
+}
+
+void CoolScroll::Internal::CoolScrollPlugin::saveSettings()
+{
+    QSettings *settings = Core::ICore::instance()->settings();
+    settings->beginGroup(l_nSettingsGroup);
+    m_settings->save(settings);
+    settings->endGroup();
+    settings->sync();
+}
+
+void CoolScroll::Internal::CoolScrollPlugin::settingChanged()
+{
+    saveSettings();
+    Core::EditorManager* em = Core::ICore::instance()->editorManager();
+
+    QList<Core::IEditor*> editors = em->openedEditors();
+    QList<Core::IEditor*>::iterator it = editors.begin();
+    // editors will update settings after next opening
+    for( ; it != editors.end(); ++it)
+    {
+        CoolScrollBar* bar = getEditorScrollBar(*it);
+        Q_ASSERT(bar);
+        bar->markStateDirty();
+    }
+    // update current editor right now
+    CoolScrollBar* bar = getEditorScrollBar(em->currentEditor());
+    Q_ASSERT(bar);
+    bar->fullUpdateSettings();
+}
+
+
+CoolScrollBar * CoolScrollPlugin::getEditorScrollBar(Core::IEditor *editor)
+{
+    TextEditor::BaseTextEditorWidget* baseEditor = qobject_cast<TextEditor::BaseTextEditorWidget*>
+                                                                (editor->widget());
+    return qobject_cast<CoolScrollBar*>(baseEditor->verticalScrollBar());
+}
+
 Q_EXPORT_PLUGIN2(CoolScroll, CoolScrollPlugin)
-
-

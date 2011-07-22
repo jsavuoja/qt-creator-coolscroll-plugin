@@ -7,13 +7,17 @@ DEFINES += COOLSCROLL_LIBRARY
 
 SOURCES += coolscrollplugin.cpp \
     coolscrollbar.cpp \
-    coolscrollbarsettings.cpp
+    coolscrollbarsettings.cpp \
+    settingspage.cpp \
+    settingsdialog.cpp
 
 HEADERS += coolscrollplugin.h\
         coolscroll_global.h\
         coolscrollconstants.h \
     coolscrollbar.h \
-    coolscrollbarsettings.h
+    coolscrollbarsettings.h \
+    settingspage.h \
+    settingsdialog.h
 
 OTHER_FILES = CoolScroll.pluginspec
 
@@ -35,3 +39,6 @@ include($$QTCREATOR_SOURCES/src/plugins/coreplugin/coreplugin.pri)
 include($$QTCREATOR_SOURCES/src/plugins/texteditor/texteditor.pri)
 
 LIBS += -L$$IDE_PLUGIN_PATH/Nokia
+
+FORMS += \
+    settingsdialog.ui

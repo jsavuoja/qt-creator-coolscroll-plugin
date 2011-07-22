@@ -34,9 +34,6 @@
 #include <QtGui/QTextDocumentFragment>
 
 #include <QtGui/QPainter>
-#include <QtGui/QStyle>
-#include <QFuture>
-#include <QtConcurrentRun>
 #include <QApplication>
 #include <QDebug>
 
@@ -53,21 +50,28 @@ CoolScrollBar::CoolScrollBar(TextEditor::BaseTextEditorWidget* edit,
     m_settings(settings),
     m_yAdditionalScale(1.0),
     m_highlightNextSelection(false),
-    m_leftButtonPressed(false)
+    m_leftButtonPressed(false),
+    m_stateDirty(false)
 {
     m_parentEdit->viewport()->installEventFilter(this);
 
     m_internalDocument = originalDocument().clone();
+    // TODO: deprecate
     applySettingsToDocument(internalDocument());
-    connect(m_parentEdit, SIGNAL(textChanged()), SLOT(onDocumentContentChanged()));
-    connect(m_parentEdit, SIGNAL(selectionChanged()), SLOT(onDocumentSelectionChanged()));
+    connect(m_parentEdit, SIGNAL(textChanged()), SLOT(documentContentChanged()));
+    connect(m_parentEdit, SIGNAL(selectionChanged()), SLOT(documentSelectionChanged()));
 
     updatePicture();
 }
 ////////////////////////////////////////////////////////////////////////////
 void CoolScrollBar::paintEvent(QPaintEvent *event)
 {
-    Q_UNUSED(event)
+    Q_UNUSED(event);
+
+    if(m_stateDirty)
+    {
+        fullUpdateSettings();
+    }
 
     QPainter p(this);
     p.drawPixmap(0, 0, width(), height(), m_previewPic);
@@ -162,23 +166,23 @@ bool CoolScrollBar::eventFilter(QObject *obj, QEvent *e)
 ////////////////////////////////////////////////////////////////////////////
 qreal CoolScrollBar::getXScale() const
 {
-    return settings().m_xDefaultScale;
+    return settings().xDefaultScale;
 }
 ////////////////////////////////////////////////////////////////////////////
 qreal CoolScrollBar::getYScale() const
 {
-    return settings().m_yDefaultScale * m_yAdditionalScale;
+    return settings().yDefaultScale * m_yAdditionalScale;
 }
 ////////////////////////////////////////////////////////////////////////////
 void CoolScrollBar::drawViewportRect(QPainter &p)
 {
     qreal lineHeight = calculateLineHeight();
     QPointF rectPos(0, value() * lineHeight);
-    QRectF rect(rectPos, QSizeF(settings().m_scrollBarWidth / getXScale(),
+    QRectF rect(rectPos, QSizeF(settings().scrollBarWidth / getXScale(),
                                 linesInViewportCount() * lineHeight));
 
     p.setPen(Qt::NoPen);
-    p.setBrush(QBrush(settings().m_viewportColor));
+    p.setBrush(QBrush(settings().viewportColor));
     p.drawRect(rect);
 }
 ////////////////////////////////////////////////////////////////////////////

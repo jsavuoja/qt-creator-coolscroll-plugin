@@ -49,6 +49,9 @@ public:
     CoolScrollBar(TextEditor::BaseTextEditorWidget* edit,
                   QSharedPointer<CoolScrollbarSettings>& settings);
 
+    void markStateDirty() { m_stateDirty = true; }
+    void fullUpdateSettings();
+
 protected:
 
     void paintEvent(QPaintEvent *event);
@@ -83,8 +86,8 @@ protected:
 
 protected slots:
 
-    void onDocumentContentChanged();
-    void onDocumentSelectionChanged();
+    void documentContentChanged();
+    void documentSelectionChanged();
 
 private:
 
@@ -110,13 +113,14 @@ private:
     QTextDocument* m_internalDocument;
 
     QPixmap m_previewPic;
+    QVector<QRectF> m_selectionRects;
 
     QString m_stringToHighlight;
-    bool m_highlightNextSelection;
 
+    bool m_highlightNextSelection;
     bool m_leftButtonPressed;
 
-    QVector<QRectF> m_selectionRects;
+    bool m_stateDirty;
 
 };
 

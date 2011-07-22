@@ -38,6 +38,7 @@
 #include <QSharedPointer>
 
 class CoolScrollbarSettings;
+class CoolScrollBar;
 
 namespace CoolScroll {
 namespace Internal {
@@ -56,11 +57,17 @@ public:
 
 private:
 
+    void readSettings();
+    void saveSettings();
+
+    static CoolScrollBar* getEditorScrollBar(Core::IEditor* editor);
+
     QSharedPointer<CoolScrollbarSettings> m_settings;
 
 private slots:
-    void triggerAction();
-    void on_editorCreated(Core::IEditor *editor, const QString &fileName);
+
+    void editorCreated(Core::IEditor *editor, const QString &fileName);
+    void settingChanged();
 };
 
 } // namespace Internal
