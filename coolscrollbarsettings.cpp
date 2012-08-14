@@ -47,7 +47,7 @@ CoolScrollbarSettings::CoolScrollbarSettings() :
     disableContextMenu(true),
     m_minSelectionHeight(1.5)
 {
-    m_font.setPointSizeF(1.5);
+    m_font.setPointSizeF(2.0);
     m_font.setStyleHint(QFont::Monospace);
     m_font.setFamily("inconsolata");
     m_font.setBold(true);
