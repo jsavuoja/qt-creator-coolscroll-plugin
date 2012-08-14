@@ -21,24 +21,28 @@ HEADERS += coolscrollplugin.h\
 
 OTHER_FILES = CoolScroll.pluginspec
 
-
 # Qt Creator linking
-
-## set the QTC_SOURCE environment variable to override the setting here
-QTCREATOR_SOURCES = $$(QTC_SOURCE)
-isEmpty(QTCREATOR_SOURCES):QTCREATOR_SOURCES=/home/diver/work/qt-creator
 
 ## set the QTC_BUILD environment variable to override the setting here
 IDE_BUILD_TREE = $$(QTC_BUILD)
-isEmpty(IDE_BUILD_TREE):IDE_BUILD_TREE=/home/diver/work/qtcreator-build-desktop
+isEmpty(IDE_BUILD_TREE):IDE_BUILD_TREE=/tmp/qtc
 
 PROVIDER = Zhuk
 
-include($$QTCREATOR_SOURCES/src/qtcreatorplugin.pri)
-include($$QTCREATOR_SOURCES/src/plugins/coreplugin/coreplugin.pri)
-include($$QTCREATOR_SOURCES/src/plugins/texteditor/texteditor.pri)
+LIBS += -L$$LIBSROOT \
+-L$$LIBSROOT/qtcreator \
+-L$$LIBSROOT/qtcreator/plugins/Nokia/
 
-LIBS += -L$$IDE_PLUGIN_PATH/Nokia
+###
+# Set the QTC_SOURCE environment variable to set the setting here
+
+include($$QTC_SOURCE/src/qtcreatorplugin.pri)
+include($$QTC_SOURCE/src/plugins/coreplugin/coreplugin.pri)
+include($$QTC_SOURCE/src/plugins/texteditor/texteditor.pri)
 
 FORMS += \
     settingsdialog.ui
+
+message(QTC_SOURCE = $$QTC_SOURCE)
+message(LIBSROOT = $$LIBSROOT)
+message(Good luck with make...)
