@@ -60,7 +60,10 @@ CoolScrollBar::CoolScrollBar(TextEditor::BaseTextEditorWidget* edit,
     m_yAdditionalScale(1.0),
     m_highlightNextSelection(false),
     m_leftButtonPressed(false),
-    m_stateDirty(false)
+    m_stateDirty(false),
+    m_redrawOnResize(true),
+    m_squeezeFactorX(1.0),
+    m_squeezeFactorY(1.0)
 {
     m_parentEdit->viewport()->installEventFilter(this);
 
@@ -88,9 +91,19 @@ void CoolScrollBar::paintEvent(QPaintEvent *event)
     }
 
     QPainter p(this);
-    p.drawPixmap(0, 0, width(), height(), m_previewPic);
 
-    p.scale(getXScale(), getYScale());
+    TextEditor::FontSettings fontSettings =
+        TextEditor::TextEditorSettings::instance()->fontSettings();
+    p.fillRect(
+        rect(),
+        fontSettings.formatFor(QLatin1String(TextEditor::Constants::C_TEXT)).background());
+
+    p.drawPixmap(
+        MARKER_MARGIN_WIDTH,
+        0,
+        width() - MARKER_MARGIN_WIDTH,
+        height(),
+        m_previewPic);
 
     drawViewportRect(p);
     drawSelections(p);
@@ -200,10 +213,13 @@ qreal CoolScrollBar::getYScale() const
 ////////////////////////////////////////////////////////////////////////////
 void CoolScrollBar::drawViewportRect(QPainter &p)
 {
-    qreal lineHeight = calculateLineHeight();
-    QPointF rectPos(0, value() * lineHeight);
-    QRectF rect(rectPos, QSizeF(settings().scrollBarWidth / getXScale(),
-                                linesInViewportCount() * lineHeight));
+    QPointF viewportTopLeft(0, lineCountToDocumentHeight(value()) * m_squeezeFactorY);
+    
+    QRectF rect(
+        viewportTopLeft,
+        QSizeF(
+            settings().scrollBarWidth,
+            lineCountToDocumentHeight(linesInViewportCount()) * m_squeezeFactorY));
 
     p.setPen(Qt::NoPen);
     p.setBrush(QBrush(settings().viewportColor));
@@ -212,8 +228,32 @@ void CoolScrollBar::drawViewportRect(QPainter &p)
 ////////////////////////////////////////////////////////////////////////////
 qreal CoolScrollBar::calculateLineHeight() const
 {
-    QFontMetrics fm(settings().m_font);
-    return qreal(fm.height());
+    QFontMetricsF fm(m_internalDocument->defaultFont());
+    return fm.height();
+}
+////////////////////////////////////////////////////////////////////////////
+qreal CoolScrollBar::lineCountToDocumentHeight(int lineCount) const
+{
+    QFontMetricsF fm(m_internalDocument->defaultFont());
+    
+    qreal documentHeight = fm.height() * lineCount;
+    qreal lineLeading = fm.leading();
+    if (lineCount > 1 && lineLeading > 0.0)
+    {
+        // Add line spacing.
+        documentHeight += (lineCount - 1) * lineLeading;
+    }
+    return documentHeight;
+}
+////////////////////////////////////////////////////////////////////////////
+qreal CoolScrollBar::documentHeightVirtual() const
+{
+    return lineCountToDocumentHeight(m_internalDocument->lineCount());
+}
+////////////////////////////////////////////////////////////////////////////
+qreal CoolScrollBar::documentHeightScreen() const
+{
+    return documentHeightVirtual() * getYScale();
 }
 ////////////////////////////////////////////////////////////////////////////
 void CoolScrollBar::drawPreview(QPainter& p)
@@ -318,51 +358,127 @@ void CoolScrollBar::mouseMoveEvent(QMouseEvent *event)
 void CoolScrollBar::updatePicture()
 {
     updateScaleFactors();
-    m_previewPic = QPixmap(width() / getXScale(), height() / getYScale());
-    m_previewPic.fill(Qt::white);
-    QPainter pic(&m_previewPic);
-    drawPreview(pic);
-    pic.end();
+    
+    if (!TextEditor::TextEditorSettings::instance())
+    {
+        return;
+    }
 
-    // scale pixmap with bilinear filtering
-    m_previewPic = m_previewPic.scaled(width(), height(), Qt::IgnoreAspectRatio,
-                                       Qt::SmoothTransformation);
+    TextEditor::FontSettings fontSettings =
+        TextEditor::TextEditorSettings::instance()->fontSettings();
+    QFontMetricsF fm(fontSettings.font());
+    int lineCount = m_internalDocument->lineCount();
+
+    qreal parentFullHeight = fm.height() * lineCount;
+    qreal lineLeading = fm.leading();
+    if (lineCount > 1 && lineLeading > 0.0)
+    {
+        // Add line spacing.
+        parentFullHeight += (lineCount - 1) * lineLeading;
+    }
+
+    // Ensure that the height is not less than the current scrollbar viewport
+    // height.
+    //parentFullHeight = std::max<qreal>(parentFullHeight, height());
+
+    // Exclude left-hand side extra area and scroll bar areas from the
+    // preview pic.
+    int extraAreaWidth = m_parentEdit->extraAreaWidth();
+    int scrollBarWidth = width();
+
+    QSize parentFullSize(
+        m_parentEdit->width(),
+        parentFullHeight);
+
+    QSize oldSize(m_parentEdit->size());
+    int scrollValue = value();
+
+    int pixmapHeight = parentFullSize.height();
+
+    qreal referenceDocumentHeight = documentHeightVirtual();
+    if (referenceDocumentHeight < height())
+    {
+        pixmapHeight += pixmapHeight * (height() / referenceDocumentHeight - 1.0);
+        m_squeezeFactorY = 1.0f;
+    }
+    else
+    {
+        m_squeezeFactorY = qreal(height()) / referenceDocumentHeight;
+    }
+
+    // Disallow resize events to recursively call the current method.
+    m_redrawOnResize = false;
+
+    m_parentEdit->resize(parentFullSize);
+
+    QPixmap pixmap(
+        parentFullSize.width() - extraAreaWidth - scrollBarWidth,
+        pixmapHeight); // parentFullSize.height());
+
+    pixmap.fill(
+        fontSettings.formatFor(QLatin1String(TextEditor::Constants::C_TEXT)).background());
+
+    m_parentEdit->render(
+        &pixmap,
+        QPoint(),
+        QRegion(
+            extraAreaWidth,
+            0,
+            parentFullSize.width() - extraAreaWidth - scrollBarWidth,
+            parentFullSize.height())
+    );
+
+    m_parentEdit->resize(oldSize);
+    setValue(scrollValue);
+
+    m_redrawOnResize = true;
+
+    m_squeezeFactorX = qreal(width() - MARKER_MARGIN_WIDTH) / qreal(pixmap.width());
+
+    m_previewPic = pixmap.scaled(
+        width() - MARKER_MARGIN_WIDTH,
+        height(),
+        Qt::IgnoreAspectRatio,
+        Qt::SmoothTransformation);
 }
 ////////////////////////////////////////////////////////////////////////////
 void CoolScrollBar::updateScaleFactors()
 {
-    int lineHeight = calculateLineHeight();
-
-    qreal documentHeight = qreal(lineHeight * m_internalDocument->lineCount());
-    documentHeight *= settings().yDefaultScale;
-
+    qreal documentHeight = documentHeightVirtual();
     if(documentHeight > size().height())
     {
         m_yAdditionalScale = size().height() / documentHeight;
+    }
+    else
+    {
+        m_yAdditionalScale = 1.0;
     }
 }
 ////////////////////////////////////////////////////////////////////////////
 void CoolScrollBar::resizeEvent(QResizeEvent *)
 {
-    updatePicture();
+    if (m_redrawOnResize)
+    {
+        updatePicture();
+    }
 }
 ////////////////////////////////////////////////////////////////////////////
 int CoolScrollBar::posToScrollValue(qreal pos) const
 {
-    qreal documentHeight = internalDocument().lineCount() * calculateLineHeight() * getYScale();
-    int value = int(pos * (maximum() + linesInViewportCount()) / documentHeight);
+    qreal documentHeight = documentHeightScreen();
+    int scrollTick = int(pos * (maximum() + linesInViewportCount()) / documentHeight);
 
     // set center of a viewport to position of click
-    value -= linesInViewportCount() / 2;
-    if(value > maximum())
+    scrollTick -= linesInViewportCount() / 2;
+    if(scrollTick > maximum())
     {
-        value = maximum();
+        scrollTick = maximum();
     }
-    else if (value < minimum())
+    else if (scrollTick < minimum())
     {
-        value = minimum();
+        scrollTick = minimum();
     }
-    return value;
+    return scrollTick;
 }
 ////////////////////////////////////////////////////////////////////////////
 void CoolScrollBar::mouseReleaseEvent(QMouseEvent *event)
@@ -394,8 +510,8 @@ void CoolScrollBar::drawSelections(QPainter &p)
     {
         p.drawRect(
             QRect(
-                MARKER_TICK_XPOS * m_coordScalingX,
-                rect.top() * m_coordScalingY,
+                MARKER_TICK_XPOS * m_squeezeFactorX,
+                rect.top() * m_squeezeFactorY,
                 MARKER_TICK_SIZE,
                 MARKER_TICK_SIZE));
     }

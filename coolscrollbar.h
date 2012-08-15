@@ -70,6 +70,8 @@ protected:
     int unfoldedLinesCount() const;
     int linesInViewportCount() const;
     qreal calculateLineHeight() const;
+    qreal lineCountToDocumentHeight(int lineCount) const;
+    
 
     qreal getXScale() const;
     qreal getYScale() const;
@@ -106,6 +108,9 @@ private:
     void highlightSelectedWord();
     void clearHighlight();
     void highlightEntryInDocument(const QString& str);
+    
+    qreal documentHeightVirtual() const;
+    qreal documentHeightScreen() const;
 
     TextEditor::BaseTextEditorWidget* m_parentEdit;
     const QSharedPointer<CoolScrollbarSettings> m_settings;
@@ -124,8 +129,16 @@ private:
 
     bool m_stateDirty;
 
+    bool m_redrawOnResize;
 
     QTimer m_refreshTimer;
+    
+    /// Relative factor between the virtual document and the screen space X.
+    qreal m_squeezeFactorX;
+    
+    /// Relative factor between the virtual document and the screen space Y.
+    qreal m_squeezeFactorY;
+
 };
 
 #endif // COOLSCROLLAREA_H
