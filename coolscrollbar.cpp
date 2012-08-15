@@ -244,9 +244,15 @@ void CoolScrollBar::highlightEntryInDocument(const QString& str)
         if(!cur_cursor.isNull())
         {
             const QTextLayout* layout = cur_cursor.block().layout();
+
             QTextLine line = layout->lineForTextPosition(cur_cursor.positionInBlock());
+            if (!line.isValid())
+            {
+                continue;
+            }
 
             QRectF selectionRect = line.naturalTextRect();
+            
             // calculate bounding rect for selected word
             int blockPos = cur_cursor.block().position();
 
