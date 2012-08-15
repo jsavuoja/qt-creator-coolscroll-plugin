@@ -89,8 +89,9 @@ void CoolScrollBar::paintEvent(QPaintEvent *event)
 
     p.scale(getXScale(), getYScale());
 
-    drawSelections(p);
     drawViewportRect(p);
+    drawSelections(p);
+
     p.end();
 }
 ////////////////////////////////////////////////////////////////////////////
