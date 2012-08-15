@@ -47,6 +47,9 @@
 namespace
 {
     const int REFRESH_PERIOD_MSEC = 1000;
+    const int MARKER_MARGIN_WIDTH = 5;
+    const int MARKER_TICK_SIZE = 3;
+    const int MARKER_TICK_XPOS = 1;
 }
 
 ////////////////////////////////////////////////////////////////////////////
@@ -380,7 +383,16 @@ void CoolScrollBar::drawSelections(QPainter &p)
 {
     p.setBrush(settings().selectionHighlightColor);
     p.setPen(Qt::NoPen);
-    p.drawRects(m_selectionRects);
+
+    foreach (QRectF rect, m_selectionRects)
+    {
+        p.drawRect(
+            QRect(
+                MARKER_TICK_XPOS * m_coordScalingX,
+                rect.top() * m_coordScalingY,
+                MARKER_TICK_SIZE,
+                MARKER_TICK_SIZE));
+    }
 }
 ////////////////////////////////////////////////////////////////////////////
 void CoolScrollBar::fullUpdateSettings()
