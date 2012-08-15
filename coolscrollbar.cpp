@@ -62,6 +62,8 @@ CoolScrollBar::CoolScrollBar(TextEditor::BaseTextEditorWidget* edit,
     m_parentEdit->viewport()->installEventFilter(this);
 
     m_internalDocument = originalDocument().clone();
+    (void)m_internalDocument->documentLayout(); // make sure that there is a layout
+
     // TODO: deprecate
     applySettingsToDocument(internalDocument());
     connect(m_parentEdit, SIGNAL(textChanged()), SLOT(documentContentChanged()));
