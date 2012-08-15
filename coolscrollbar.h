@@ -33,6 +33,7 @@
 #include <QtGui/QScrollBar>
 #include <QtGui/QPixmap>
 #include <QTextCharFormat>
+#include <QTimer>
 
 namespace TextEditor
 {
@@ -88,6 +89,7 @@ protected slots:
 
     void documentContentChanged();
     void documentSelectionChanged();
+    void onRefreshTimeout();
 
 private:
 
@@ -122,6 +124,8 @@ private:
 
     bool m_stateDirty;
 
+
+    QTimer m_refreshTimer;
 };
 
 #endif // COOLSCROLLAREA_H

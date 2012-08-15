@@ -44,6 +44,12 @@
 
 #include "coolscrollbarsettings.h"
 
+namespace
+{
+    const int REFRESH_PERIOD_MSEC = 1000;
+}
+
+////////////////////////////////////////////////////////////////////////////
 CoolScrollBar::CoolScrollBar(TextEditor::BaseTextEditorWidget* edit,
                              QSharedPointer<CoolScrollbarSettings>& settings) :
     m_parentEdit(edit),
@@ -61,7 +67,10 @@ CoolScrollBar::CoolScrollBar(TextEditor::BaseTextEditorWidget* edit,
     connect(m_parentEdit, SIGNAL(textChanged()), SLOT(documentContentChanged()));
     connect(m_parentEdit, SIGNAL(selectionChanged()), SLOT(documentSelectionChanged()));
 
-    updatePicture();
+    m_refreshTimer.setSingleShot(true);
+    connect(&m_refreshTimer, SIGNAL(timeout()), SLOT(onRefreshTimeout()));
+
+    m_refreshTimer.start(REFRESH_PERIOD_MSEC);
 }
 ////////////////////////////////////////////////////////////////////////////
 void CoolScrollBar::paintEvent(QPaintEvent *event)
@@ -123,6 +132,10 @@ void CoolScrollBar::documentContentChanged()
 {
     internalDocument().setPlainText(originalDocument().toPlainText());
 
+    // Restart update timer: we want refresh to occur only after a pause,
+    // not during writing.
+    m_refreshTimer.start(REFRESH_PERIOD_MSEC);
+
 // TODO: make optional
 //    QTextBlock origBlock = originalDocument().firstBlock();
 //    QTextBlock internBlock = internalDocument().firstBlock();
@@ -132,7 +145,7 @@ void CoolScrollBar::documentContentChanged()
 //        origBlock = origBlock.next();
 //        internBlock = internBlock.next();
 //    }
- //   updatePicture();
+    //updatePicture();
    // update();
 }
 ////////////////////////////////////////////////////////////////////////////
@@ -153,6 +166,11 @@ void CoolScrollBar::documentSelectionChanged()
             update();
         }
     }
+}
+////////////////////////////////////////////////////////////////////////////
+void CoolScrollBar::onRefreshTimeout()
+{
+    updatePicture();
 }
 ////////////////////////////////////////////////////////////////////////////
 bool CoolScrollBar::eventFilter(QObject *obj, QEvent *e)
