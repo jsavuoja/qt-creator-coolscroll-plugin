@@ -71,10 +71,6 @@ protected:
     int linesInViewportCount() const;
     qreal calculateLineHeight() const;
     qreal lineCountToDocumentHeight(int lineCount) const;
-    
-
-    qreal getXScale() const;
-    qreal getYScale() const;
 
     // original document access
     const QTextDocument& originalDocument() const;
@@ -101,8 +97,6 @@ private:
 
     void updatePicture();
 
-    void updateScaleFactors();
-
     int posToScrollValue(qreal pos) const;
 
     void highlightSelectedWord();
@@ -115,8 +109,6 @@ private:
     TextEditor::BaseTextEditorWidget* m_parentEdit;
     const QSharedPointer<CoolScrollbarSettings> m_settings;
 
-    // this parameter is <1.0 if file is to large
-    qreal m_yAdditionalScale;
     QTextDocument* m_internalDocument;
 
     QPixmap m_previewPic;

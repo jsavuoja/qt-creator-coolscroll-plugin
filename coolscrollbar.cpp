@@ -57,7 +57,6 @@ CoolScrollBar::CoolScrollBar(TextEditor::BaseTextEditorWidget* edit,
                              QSharedPointer<CoolScrollbarSettings>& settings) :
     m_parentEdit(edit),
     m_settings(settings),
-    m_yAdditionalScale(1.0),
     m_highlightNextSelection(false),
     m_leftButtonPressed(false),
     m_stateDirty(false),
@@ -201,16 +200,6 @@ bool CoolScrollBar::eventFilter(QObject *obj, QEvent *e)
     return false;
 }
 ////////////////////////////////////////////////////////////////////////////
-qreal CoolScrollBar::getXScale() const
-{
-    return settings().xDefaultScale;
-}
-////////////////////////////////////////////////////////////////////////////
-qreal CoolScrollBar::getYScale() const
-{
-    return settings().yDefaultScale * m_yAdditionalScale;
-}
-////////////////////////////////////////////////////////////////////////////
 void CoolScrollBar::drawViewportRect(QPainter &p)
 {
     QPointF viewportTopLeft(0, lineCountToDocumentHeight(value()) * m_squeezeFactorY);
@@ -253,7 +242,7 @@ qreal CoolScrollBar::documentHeightVirtual() const
 ////////////////////////////////////////////////////////////////////////////
 qreal CoolScrollBar::documentHeightScreen() const
 {
-    return documentHeightVirtual() * getYScale();
+    return documentHeightVirtual() * m_squeezeFactorY;
 }
 ////////////////////////////////////////////////////////////////////////////
 void CoolScrollBar::drawPreview(QPainter& p)
@@ -277,7 +266,6 @@ void CoolScrollBar::highlightEntryInDocument(const QString& str)
     m_selectionRects.clear();
     QTextCursor cur_cursor(&internalDocument());
     int numIter = 0;
-    qreal yScale = getYScale();
     while(true)
     {
         cur_cursor = internalDocument().find(str, cur_cursor);
@@ -305,9 +293,9 @@ void CoolScrollBar::highlightEntryInDocument(const QString& str)
             selectionRect.translate(layout->position());
 
             // apply minimum selection height for good visibility on large files
-            if((selectionRect.height() * yScale) < settings().m_minSelectionHeight)
+            if((selectionRect.height() * m_squeezeFactorY) < settings().m_minSelectionHeight)
             {
-                selectionRect.setHeight(settings().m_minSelectionHeight / yScale);
+                selectionRect.setHeight(settings().m_minSelectionHeight / m_squeezeFactorY);
             }
 
             m_selectionRects.push_back(selectionRect);
@@ -357,8 +345,6 @@ void CoolScrollBar::mouseMoveEvent(QMouseEvent *event)
 ////////////////////////////////////////////////////////////////////////////
 void CoolScrollBar::updatePicture()
 {
-    updateScaleFactors();
-    
     if (!TextEditor::TextEditorSettings::instance())
     {
         return;
@@ -440,19 +426,6 @@ void CoolScrollBar::updatePicture()
         height(),
         Qt::IgnoreAspectRatio,
         Qt::SmoothTransformation);
-}
-////////////////////////////////////////////////////////////////////////////
-void CoolScrollBar::updateScaleFactors()
-{
-    qreal documentHeight = documentHeightVirtual();
-    if(documentHeight > size().height())
-    {
-        m_yAdditionalScale = size().height() / documentHeight;
-    }
-    else
-    {
-        m_yAdditionalScale = 1.0;
-    }
 }
 ////////////////////////////////////////////////////////////////////////////
 void CoolScrollBar::resizeEvent(QResizeEvent *)

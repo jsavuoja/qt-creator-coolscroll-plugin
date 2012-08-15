@@ -45,10 +45,10 @@ public:
     void read(const QSettings* settings);
 
     int scrollBarWidth;
+    qreal preferredFontSize;
     QColor viewportColor;
     QColor selectionHighlightColor;
-    qreal xDefaultScale;
-    qreal yDefaultScale;
+
     bool disableContextMenu;
 
     // this options cannot be changed by user

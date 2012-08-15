@@ -31,25 +31,23 @@
 namespace
 {
     const QString l_nWidth("scrollbar_width");
+    const QString l_nFontSize("preferred_font_size");
     const QString l_nVieportColor("vieport_color");
     const QString l_nSelectionColor("selection_color");
-    const QString l_nXScale("x_default_scale");
-    const QString l_nYScale("y_default_scale");
     const QString l_nContextMenu("disable_context_menu");
 }
 
 CoolScrollbarSettings::CoolScrollbarSettings() :
     scrollBarWidth(70),
+    preferredFontSize(2.0),
     viewportColor(QColor(0, 0, 255, 20)),
     selectionHighlightColor(Qt::red),
-    xDefaultScale(0.9),
-    yDefaultScale(0.7),
     disableContextMenu(true),
     m_minSelectionHeight(1.5)
 {
-    m_font.setPointSizeF(2.0);
+    m_font.setPointSizeF(preferredFontSize);
     m_font.setStyleHint(QFont::Monospace);
-    m_font.setFamily("inconsolata");
+    m_font.setFamily("monospace");
     m_font.setBold(true);
     m_font.setStyleStrategy(QFont::NoAntialias);
 
@@ -59,23 +57,22 @@ CoolScrollbarSettings::CoolScrollbarSettings() :
 void CoolScrollbarSettings::save(QSettings *settings)
 {
     settings->setValue(l_nWidth, scrollBarWidth);
+    settings->setValue(l_nFontSize, preferredFontSize);
     settings->setValue(l_nVieportColor, viewportColor);
     settings->setValue(l_nSelectionColor, selectionHighlightColor);
-    settings->setValue(l_nXScale, xDefaultScale);
-    settings->setValue(l_nYScale, yDefaultScale);
     settings->setValue(l_nContextMenu, disableContextMenu);
 }
 
 void CoolScrollbarSettings::read(const QSettings *settings)
 {
     scrollBarWidth = settings->value(l_nWidth, scrollBarWidth).toInt();
+    preferredFontSize = settings->value(l_nFontSize, preferredFontSize).toDouble();
     viewportColor = settings->value(l_nVieportColor, QVariant(viewportColor)).
                                     value<QColor>();
     selectionHighlightColor = settings->value(l_nSelectionColor,
                                               QVariant(selectionHighlightColor)).
                                               value<QColor>();
-
-    xDefaultScale = settings->value(l_nXScale, xDefaultScale).toDouble();
-    yDefaultScale = settings->value(l_nYScale, yDefaultScale).toDouble();
     disableContextMenu = settings->value(l_nContextMenu, disableContextMenu).toBool();
+    
+    m_font.setPointSizeF(preferredFontSize);
 }
