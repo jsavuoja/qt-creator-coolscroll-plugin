@@ -34,6 +34,7 @@ namespace
     const QString l_nFontSize("preferred_font_size");
     const QString l_nVieportColor("vieport_color");
     const QString l_nSelectionColor("selection_color");
+    const QString l_nInvertViewportColoring("invert_viewport_coloring");
     const QString l_nContextMenu("disable_context_menu");
 }
 
@@ -42,6 +43,7 @@ CoolScrollbarSettings::CoolScrollbarSettings() :
     preferredFontSize(2.0),
     viewportColor(QColor(0, 0, 255, 20)),
     selectionHighlightColor(Qt::red),
+    invertViewportColoring(false),
     disableContextMenu(true),
     m_minSelectionHeight(1.5)
 {
@@ -60,6 +62,7 @@ void CoolScrollbarSettings::save(QSettings *settings)
     settings->setValue(l_nFontSize, preferredFontSize);
     settings->setValue(l_nVieportColor, viewportColor);
     settings->setValue(l_nSelectionColor, selectionHighlightColor);
+    settings->setValue(l_nInvertViewportColoring, invertViewportColoring);
     settings->setValue(l_nContextMenu, disableContextMenu);
 }
 
@@ -72,6 +75,7 @@ void CoolScrollbarSettings::read(const QSettings *settings)
     selectionHighlightColor = settings->value(l_nSelectionColor,
                                               QVariant(selectionHighlightColor)).
                                               value<QColor>();
+    invertViewportColoring = settings->value(l_nInvertViewportColoring, invertViewportColoring).toBool();
     disableContextMenu = settings->value(l_nContextMenu, disableContextMenu).toBool();
     
     m_font.setPointSizeF(preferredFontSize);

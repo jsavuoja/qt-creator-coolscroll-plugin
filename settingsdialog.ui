@@ -106,6 +106,20 @@
     <item row="1" column="1">
      <widget class="QDoubleSpinBox" name="fontSizeSpinBox"/>
     </item>
+    <item row="4" column="1">
+     <widget class="QCheckBox" name="invertViewportColoring">
+      <property name="text">
+       <string/>
+      </property>
+     </widget>
+    </item>
+    <item row="4" column="0">
+     <widget class="QLabel" name="label_5">
+      <property name="text">
+       <string>Invert Viewport Coloring:</string>
+      </property>
+     </widget>
+    </item>
    </layout>
   </widget>
  </widget>

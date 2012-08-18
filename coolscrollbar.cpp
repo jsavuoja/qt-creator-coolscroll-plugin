@@ -202,13 +202,39 @@ bool CoolScrollBar::eventFilter(QObject *obj, QEvent *e)
 ////////////////////////////////////////////////////////////////////////////
 void CoolScrollBar::drawViewportRect(QPainter &p)
 {
-    QPointF viewportTopLeft(0, lineCountToDocumentHeight(value()) * m_squeezeFactorY);
+    if (settings().invertViewportColoring)
+    {
+        drawViewportRect(
+            p, 
+            0.0f, 
+            lineCountToDocumentHeight(value() - 1) * m_squeezeFactorY);
+            
+        qreal bottomPartStartY = 
+            lineCountToDocumentHeight(value() - 1 + linesInViewportCount()) * m_squeezeFactorY;
+            
+        drawViewportRect(
+            p, 
+            bottomPartStartY,
+            height() - bottomPartStartY);
+    }
+    else
+    {
+        drawViewportRect(
+            p, 
+            lineCountToDocumentHeight(value()) * m_squeezeFactorY, 
+            lineCountToDocumentHeight(linesInViewportCount()) * m_squeezeFactorY);
+    }
+}
+////////////////////////////////////////////////////////////////////////////
+void CoolScrollBar::drawViewportRect(QPainter& p, qreal startY, qreal sizeY)
+{
+    QPointF viewportTopLeft(0, startY);
     
     QRectF rect(
         viewportTopLeft,
         QSizeF(
             settings().scrollBarWidth,
-            lineCountToDocumentHeight(linesInViewportCount()) * m_squeezeFactorY));
+            sizeY));
 
     p.setPen(Qt::NoPen);
     p.setBrush(QBrush(settings().viewportColor));

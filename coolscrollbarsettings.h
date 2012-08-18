@@ -48,6 +48,7 @@ public:
     qreal preferredFontSize;
     QColor viewportColor;
     QColor selectionHighlightColor;
+    bool invertViewportColoring;
 
     bool disableContextMenu;
 

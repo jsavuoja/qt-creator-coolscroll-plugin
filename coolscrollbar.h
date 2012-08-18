@@ -94,6 +94,7 @@ private:
     void drawPreview(QPainter& p);
     void drawSelections(QPainter& p);
     void drawViewportRect(QPainter& p);
+    void drawViewportRect(QPainter& p, qreal startY, qreal sizeY);
 
     void updatePicture();
 

@@ -49,6 +49,7 @@ SettingsDialog::SettingsDialog(QWidget *parent) :
 
     connect(ui->widthSpinBox, SIGNAL(valueChanged(int)), SLOT(settingsChanged()));
     connect(ui->fontSizeSpinBox, SIGNAL(valueChanged(double)), SLOT(settingsChanged()));
+    connect(ui->invertViewportColoring, SIGNAL(stateChanged(int)), SLOT(settingsChanged()));
     connect(ui->contextMenuCheckBox, SIGNAL(stateChanged(int)), SLOT(settingsChanged()));
 }
 ////////////////////////////////////////////////////////////////////////////
@@ -63,6 +64,7 @@ void SettingsDialog::setSettings(const CoolScrollbarSettings &settings)
     ui->fontSizeSpinBox->setValue(settings.preferredFontSize);
     setButtonColor(ui->vieportColotButton, settings.viewportColor);
     setButtonColor(ui->selectionColorButton,settings.selectionHighlightColor);
+    ui->invertViewportColoring->setChecked(settings.invertViewportColoring);
     ui->contextMenuCheckBox->setChecked(!settings.disableContextMenu);
 }
 ////////////////////////////////////////////////////////////////////////////
@@ -101,6 +103,7 @@ void SettingsDialog::getSettings(CoolScrollbarSettings &settings) const
     settings.preferredFontSize = ui->fontSizeSpinBox->value();
     settings.viewportColor = getButtonColor(ui->vieportColotButton);
     settings.selectionHighlightColor = getButtonColor(ui->selectionColorButton);
+    settings.invertViewportColoring = ui->invertViewportColoring->isChecked();
     settings.disableContextMenu = !ui->contextMenuCheckBox->isChecked();
 }
 ////////////////////////////////////////////////////////////////////////////
