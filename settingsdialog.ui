@@ -44,7 +44,7 @@
      <widget class="QSpinBox" name="widthSpinBox"/>
     </item>
     <item row="2" column="1">
-     <widget class="QPushButton" name="vieportColotButton">
+     <widget class="QPushButton" name="viewportColorButton">
       <property name="autoFillBackground">
        <bool>true</bool>
       </property>
