@@ -83,6 +83,7 @@ protected slots:
     void documentContentChanged();
     void documentSelectionChanged();
     void onRefreshTimeout();
+    void onDocumentSizeChanged(const QSizeF& newSize);
 
 private:
     
@@ -90,6 +91,7 @@ private:
     void drawViewportRect(QPainter& p);
     void drawViewportRect(QPainter& p, qreal startY, qreal sizeY);
 
+    void restartDeferredUpdate();
     void updatePicture();
 
     int posToScrollValue(qreal pos) const;
@@ -123,7 +125,6 @@ private:
     
     /// Relative factor between the virtual document and the screen space Y.
     qreal m_squeezeFactorY;
-
 };
 
 #endif // COOLSCROLLAREA_H

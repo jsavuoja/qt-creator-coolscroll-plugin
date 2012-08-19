@@ -70,6 +70,12 @@ CoolScrollBar::CoolScrollBar(TextEditor::BaseTextEditorWidget* edit,
     connect(m_parentEdit, SIGNAL(textChanged()), SLOT(documentContentChanged()));
     connect(m_parentEdit, SIGNAL(selectionChanged()), SLOT(documentSelectionChanged()));
 
+    // Catch notifications about code folding.
+    connect(
+        m_parentEdit->document()->documentLayout(), 
+        SIGNAL(documentSizeChanged(const QSizeF&)),
+        SLOT(onDocumentSizeChanged(const QSizeF&)));
+
     m_refreshTimer.setSingleShot(true);
     connect(&m_refreshTimer, SIGNAL(timeout()), SLOT(onRefreshTimeout()));
 
@@ -157,6 +163,13 @@ void CoolScrollBar::documentContentChanged()
 {
     // Restart update timer: we want refresh to occur only after a pause,
     // not during writing.
+    restartDeferredUpdate();
+}
+////////////////////////////////////////////////////////////////////////////
+void CoolScrollBar::restartDeferredUpdate()
+{
+    // Restart update timer: we want refresh to occur only after a pause,
+    // not during writing.
     m_refreshTimer.start(REFRESH_PERIOD_MSEC);
 }
 ////////////////////////////////////////////////////////////////////////////
@@ -182,6 +195,12 @@ void CoolScrollBar::documentSelectionChanged()
 void CoolScrollBar::onRefreshTimeout()
 {
     updatePicture();
+}
+////////////////////////////////////////////////////////////////////////////
+void CoolScrollBar::onDocumentSizeChanged(const QSizeF& newSize)
+{
+    Q_UNUSED(newSize);
+    restartDeferredUpdate();
 }
 ////////////////////////////////////////////////////////////////////////////
 bool CoolScrollBar::eventFilter(QObject *obj, QEvent *e)
