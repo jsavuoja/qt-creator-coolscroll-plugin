@@ -113,17 +113,17 @@ void CoolScrollBar::paintEvent(QPaintEvent *event)
 int CoolScrollBar::unfoldedLinesCount() const
 {
     Q_ASSERT(m_parentEdit);
-    int res = 0;
-    QTextBlock b = originalDocument().firstBlock();
-    while(b != originalDocument().lastBlock())
+    int lineCount = 0;
+    QTextBlock textBlock = originalDocument().firstBlock();
+    while (textBlock.isValid())
     {
-        if(b.isVisible())
+        if (textBlock.isVisible())
         {
-            res += b.lineCount();
+            lineCount += textBlock.lineCount();
         }
-        b = b.next();
+        textBlock = textBlock.next();
     }
-    return res;
+    return lineCount;
 }
 ////////////////////////////////////////////////////////////////////////////
 int CoolScrollBar::linesInViewportCount() const
