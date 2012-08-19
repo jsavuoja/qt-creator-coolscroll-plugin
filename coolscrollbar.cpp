@@ -291,39 +291,26 @@ void CoolScrollBar::highlightEntryInDocument(const QString& str)
     }
     // TODO: optimize using QVector::reserve()
     m_selectionRects.clear();
-    QTextCursor cur_cursor(&originalDocument());
+    QTextCursor selectionCursor(&originalDocument());
     int numIter = 0;
-    while(true)
+    while (true)
     {
-        cur_cursor = originalDocument().find(str, cur_cursor);
-        if(!cur_cursor.isNull())
+        selectionCursor = originalDocument().find(str, selectionCursor);
+        if(!selectionCursor.isNull())
         {
-            const QTextLayout* layout = cur_cursor.block().layout();
+            QTextLayout* layout = selectionCursor.block().layout();
 
-            QTextLine line = layout->lineForTextPosition(cur_cursor.positionInBlock());
+            QTextLine line = layout->lineForTextPosition(selectionCursor.positionInBlock());
             if (!line.isValid())
             {
                 continue;
             }
 
-            QRectF selectionRect = line.naturalTextRect();
-            
-            // calculate bounding rect for selected word
-            int blockPos = cur_cursor.block().position();
-
-            qreal leftPercent = qreal(cur_cursor.selectionStart() - blockPos) / line.textLength();
-            qreal rightPercent = qreal(cur_cursor.selectionEnd() - blockPos) / line.textLength();
-
-            selectionRect.setLeft(line.naturalTextWidth() * leftPercent);
-            selectionRect.setRight(line.naturalTextWidth() * rightPercent);
-
-            selectionRect.translate(layout->position());
-
-            // apply minimum selection height for good visibility on large files
-            if((selectionRect.height() * m_squeezeFactorY) < settings().m_minSelectionHeight)
-            {
-                selectionRect.setHeight(settings().m_minSelectionHeight / m_squeezeFactorY);
-            }
+            QRectF selectionRect(
+                0.0f,
+                lineCountToDocumentHeight(selectionCursor.block().firstLineNumber() + line.lineNumber() + 1),
+                0.0f,
+                0.0f);
 
             m_selectionRects.push_back(selectionRect);
         }
