@@ -73,8 +73,8 @@ void SettingsDialog::colorSettingsButtonClicked()
     QPushButton* button = qobject_cast<QPushButton*>(sender());
     Q_ASSERT(button != 0);
     QColorDialog dialog;
-    dialog.setCurrentColor(getButtonColor(button));
     dialog.setOption(QColorDialog::ShowAlphaChannel, true);
+    dialog.setCurrentColor(getButtonColor(button));
     if(dialog.exec() == QDialog::Accepted)
     {
         if(getButtonColor(button) != dialog.selectedColor())
