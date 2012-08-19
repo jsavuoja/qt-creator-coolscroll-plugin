@@ -271,11 +271,6 @@ qreal CoolScrollBar::documentHeightScreen() const
     return documentHeightVirtual() * m_squeezeFactorY;
 }
 ////////////////////////////////////////////////////////////////////////////
-void CoolScrollBar::drawPreview(QPainter& p)
-{
-    internalDocument().drawContents(&p);
-}
-////////////////////////////////////////////////////////////////////////////
 void CoolScrollBar::applySettingsToDocument(QTextDocument &doc) const
 {
     doc.setDefaultFont(settings().m_font);
