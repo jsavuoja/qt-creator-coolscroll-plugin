@@ -66,11 +66,6 @@ CoolScrollBar::CoolScrollBar(TextEditor::BaseTextEditorWidget* edit,
 {
     m_parentEdit->viewport()->installEventFilter(this);
 
-    m_internalDocument = originalDocument().clone();
-    (void)m_internalDocument->documentLayout(); // make sure that there is a layout
-
-    // TODO: deprecate
-    applySettingsToDocument(internalDocument());
     connect(m_parentEdit, SIGNAL(textChanged()), SLOT(documentContentChanged()));
     connect(m_parentEdit, SIGNAL(selectionChanged()), SLOT(documentSelectionChanged()));
 
@@ -141,30 +136,21 @@ QSize CoolScrollBar::minimumSizeHint() const
     return QSize(settings().scrollBarWidth, 0);
 }
 ////////////////////////////////////////////////////////////////////////////
-const QTextDocument & CoolScrollBar::originalDocument() const
+const QTextDocument& CoolScrollBar::originalDocument() const
+{
+    return *m_parentEdit->document();
+}
+////////////////////////////////////////////////////////////////////////////
+QTextDocument& CoolScrollBar::originalDocument()
 {
     return *m_parentEdit->document();
 }
 ////////////////////////////////////////////////////////////////////////////
 void CoolScrollBar::documentContentChanged()
 {
-    internalDocument().setPlainText(originalDocument().toPlainText());
-
     // Restart update timer: we want refresh to occur only after a pause,
     // not during writing.
     m_refreshTimer.start(REFRESH_PERIOD_MSEC);
-
-// TODO: make optional
-//    QTextBlock origBlock = originalDocument().firstBlock();
-//    QTextBlock internBlock = internalDocument().firstBlock();
-//    while(origBlock.isValid() && internBlock.isValid())
-//    {
-//        internBlock.layout()->setAdditionalFormats(origBlock.layout()->additionalFormats());
-//        origBlock = origBlock.next();
-//        internBlock = internBlock.next();
-//    }
-    //updatePicture();
-   // update();
 }
 ////////////////////////////////////////////////////////////////////////////
 void CoolScrollBar::documentSelectionChanged()
@@ -243,13 +229,13 @@ void CoolScrollBar::drawViewportRect(QPainter& p, qreal startY, qreal sizeY)
 ////////////////////////////////////////////////////////////////////////////
 qreal CoolScrollBar::calculateLineHeight() const
 {
-    QFontMetricsF fm(m_internalDocument->defaultFont());
+    QFontMetricsF fm(settings().m_font);
     return fm.height();
 }
 ////////////////////////////////////////////////////////////////////////////
 qreal CoolScrollBar::lineCountToDocumentHeight(int lineCount) const
 {
-    QFontMetricsF fm(m_internalDocument->defaultFont());
+    QFontMetricsF fm(settings().m_font);
     
     qreal documentHeight = fm.height() * lineCount;
     qreal lineLeading = fm.leading();
@@ -263,18 +249,12 @@ qreal CoolScrollBar::lineCountToDocumentHeight(int lineCount) const
 ////////////////////////////////////////////////////////////////////////////
 qreal CoolScrollBar::documentHeightVirtual() const
 {
-    return lineCountToDocumentHeight(m_internalDocument->lineCount());
+    return lineCountToDocumentHeight(m_parentEdit->document()->lineCount());
 }
 ////////////////////////////////////////////////////////////////////////////
 qreal CoolScrollBar::documentHeightScreen() const
 {
     return documentHeightVirtual() * m_squeezeFactorY;
-}
-////////////////////////////////////////////////////////////////////////////
-void CoolScrollBar::applySettingsToDocument(QTextDocument &doc) const
-{
-    doc.setDefaultFont(settings().m_font);
-    doc.setDefaultTextOption(settings().m_textOption);
 }
 ////////////////////////////////////////////////////////////////////////////
 void CoolScrollBar::highlightEntryInDocument(const QString& str)
@@ -285,11 +265,11 @@ void CoolScrollBar::highlightEntryInDocument(const QString& str)
     }
     // TODO: optimize using QVector::reserve()
     m_selectionRects.clear();
-    QTextCursor cur_cursor(&internalDocument());
+    QTextCursor cur_cursor(&originalDocument());
     int numIter = 0;
     while(true)
     {
-        cur_cursor = internalDocument().find(str, cur_cursor);
+        cur_cursor = originalDocument().find(str, cur_cursor);
         if(!cur_cursor.isNull())
         {
             const QTextLayout* layout = cur_cursor.block().layout();
@@ -374,7 +354,7 @@ void CoolScrollBar::updatePicture()
     TextEditor::FontSettings fontSettings =
         TextEditor::TextEditorSettings::instance()->fontSettings();
     QFontMetricsF fm(fontSettings.font());
-    int lineCount = m_internalDocument->lineCount();
+    int lineCount = unfoldedLinesCount();
 
     qreal parentFullHeight = fm.height() * lineCount;
     qreal lineLeading = fm.leading();
@@ -516,7 +496,6 @@ void CoolScrollBar::fullUpdateSettings()
     m_stateDirty = false;
     resize(settings().scrollBarWidth, height());
     updateGeometry();
-    applySettingsToDocument(internalDocument());
     updatePicture();
     update();
 }

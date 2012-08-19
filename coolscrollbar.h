@@ -74,12 +74,7 @@ protected:
 
     // original document access
     const QTextDocument& originalDocument() const;
-
-    // access to a copy of original document
-    inline QTextDocument& internalDocument() { return *m_internalDocument; }
-    inline const QTextDocument& internalDocument() const { return *m_internalDocument; }
-
-    void applySettingsToDocument(QTextDocument& doc) const;
+    QTextDocument& originalDocument();
 
     bool eventFilter(QObject *obj, QEvent *e);
 
@@ -108,8 +103,6 @@ private:
 
     TextEditor::BaseTextEditorWidget* m_parentEdit;
     const QSharedPointer<CoolScrollbarSettings> m_settings;
-
-    QTextDocument* m_internalDocument;
 
     QPixmap m_previewPic;
     QVector<QRectF> m_selectionRects;
