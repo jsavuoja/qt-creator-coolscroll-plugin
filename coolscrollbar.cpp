@@ -106,6 +106,7 @@ void CoolScrollBar::paintEvent(QPaintEvent *event)
         height(),
         m_previewPic);
 
+    drawFoldingMarkers(p);
     drawViewportRect(p);
     drawSelections(p);
 
@@ -185,7 +186,6 @@ void CoolScrollBar::documentSelectionChanged()
             m_stringToHighlight = selectedStr;
             // highlight new selection
             highlightSelectedWord();
-
             updatePicture();
             update();
         }
@@ -251,6 +251,38 @@ void CoolScrollBar::drawViewportRect(QPainter& p, qreal startY, qreal sizeY)
     p.setPen(Qt::NoPen);
     p.setBrush(QBrush(settings().viewportColor));
     p.drawRect(rect);
+}
+////////////////////////////////////////////////////////////////////////////
+void CoolScrollBar::drawFoldingMarkers(QPainter& p)
+{
+    QTextBlock textBlock = originalDocument().firstBlock();
+    
+    QBrush markerBrush(settings().foldMarkerColor);
+    p.setBrush(markerBrush);
+    
+    QPen pen(markerBrush, 1);
+    p.setPen(pen);
+    
+    while (textBlock.isValid())
+    {
+        if (textBlock.userData() &&
+            static_cast<TextEditor::TextBlockUserData*>(textBlock.userData())->folded() &&
+            textBlock.lineCount() > 0)   // < skip folds under other folds
+        {
+            // This row is a fold point.
+            qreal yPos = lineCountToDocumentHeight(textBlock.firstLineNumber()) * m_squeezeFactorY;
+            
+            QPainterPath markerPath(
+                QPointF(width() - MARKER_MARGIN_WIDTH - 6.0f, yPos));
+            markerPath.lineTo(
+                width() - MARKER_MARGIN_WIDTH, yPos);
+            markerPath.lineTo(
+                width() - MARKER_MARGIN_WIDTH, yPos + 6.0f);
+            
+            p.drawPath(markerPath);
+        }
+        textBlock = textBlock.next();
+    }
 }
 ////////////////////////////////////////////////////////////////////////////
 qreal CoolScrollBar::calculateLineHeight() const

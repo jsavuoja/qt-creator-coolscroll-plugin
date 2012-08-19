@@ -34,6 +34,7 @@ namespace
     const QString l_nFontSize("preferred_font_size");
     const QString l_nViewportColor("viewport_color");
     const QString l_nSelectionColor("selection_color");
+    const QString l_nFoldMarkerColor("fold_marker_color");
     const QString l_nInvertViewportColoring("invert_viewport_coloring");
     const QString l_nContextMenu("disable_context_menu");
 }
@@ -62,6 +63,7 @@ void CoolScrollbarSettings::save(QSettings *settings)
     settings->setValue(l_nFontSize, preferredFontSize);
     settings->setValue(l_nViewportColor, viewportColor);
     settings->setValue(l_nSelectionColor, selectionHighlightColor);
+    settings->setValue(l_nFoldMarkerColor, foldMarkerColor);
     settings->setValue(l_nInvertViewportColoring, invertViewportColoring);
     settings->setValue(l_nContextMenu, disableContextMenu);
 }
@@ -75,6 +77,8 @@ void CoolScrollbarSettings::read(const QSettings *settings)
     selectionHighlightColor = settings->value(l_nSelectionColor,
                                               QVariant(selectionHighlightColor)).
                                               value<QColor>();
+    foldMarkerColor = settings->value(l_nFoldMarkerColor, 
+                                      QVariant(foldMarkerColor)).value<QColor>();
     invertViewportColoring = settings->value(l_nInvertViewportColoring, invertViewportColoring).toBool();
     disableContextMenu = settings->value(l_nContextMenu, disableContextMenu).toBool();
     

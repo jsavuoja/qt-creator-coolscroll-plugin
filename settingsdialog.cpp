@@ -46,6 +46,8 @@ SettingsDialog::SettingsDialog(QWidget *parent) :
                                      SLOT(colorSettingsButtonClicked()));
     connect(ui->selectionColorButton, SIGNAL(clicked()),
                                       SLOT(colorSettingsButtonClicked()));
+    connect(ui->foldMarkerColorButton, SIGNAL(clicked()),
+                                       SLOT(colorSettingsButtonClicked()));
 
     connect(ui->widthSpinBox, SIGNAL(valueChanged(int)), SLOT(settingsChanged()));
     connect(ui->fontSizeSpinBox, SIGNAL(valueChanged(double)), SLOT(settingsChanged()));
@@ -63,7 +65,8 @@ void SettingsDialog::setSettings(const CoolScrollbarSettings &settings)
     ui->widthSpinBox->setValue(settings.scrollBarWidth);
     ui->fontSizeSpinBox->setValue(settings.preferredFontSize);
     setButtonColor(ui->viewportColorButton, settings.viewportColor);
-    setButtonColor(ui->selectionColorButton,settings.selectionHighlightColor);
+    setButtonColor(ui->selectionColorButton, settings.selectionHighlightColor);
+    setButtonColor(ui->foldMarkerColorButton, settings.foldMarkerColor);
     ui->invertViewportColoring->setChecked(settings.invertViewportColoring);
     ui->contextMenuCheckBox->setChecked(!settings.disableContextMenu);
 }
@@ -103,6 +106,7 @@ void SettingsDialog::getSettings(CoolScrollbarSettings &settings) const
     settings.preferredFontSize = ui->fontSizeSpinBox->value();
     settings.viewportColor = getButtonColor(ui->viewportColorButton);
     settings.selectionHighlightColor = getButtonColor(ui->selectionColorButton);
+    settings.foldMarkerColor = getButtonColor(ui->foldMarkerColorButton);
     settings.invertViewportColoring = ui->invertViewportColoring->isChecked();
     settings.disableContextMenu = !ui->contextMenuCheckBox->isChecked();
 }

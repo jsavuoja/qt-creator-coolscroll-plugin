@@ -90,6 +90,7 @@ private:
     void drawSelections(QPainter& p);
     void drawViewportRect(QPainter& p);
     void drawViewportRect(QPainter& p, qreal startY, qreal sizeY);
+    void drawFoldingMarkers(QPainter& p);
 
     void restartDeferredUpdate();
     void updatePicture();

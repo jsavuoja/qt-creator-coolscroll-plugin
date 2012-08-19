@@ -48,6 +48,7 @@ public:
     qreal preferredFontSize;
     QColor viewportColor;
     QColor selectionHighlightColor;
+    QColor foldMarkerColor;
     bool invertViewportColoring;
 
     bool disableContextMenu;
