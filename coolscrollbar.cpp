@@ -38,6 +38,7 @@
 #include <QDebug>
 
 #include <texteditor/basetexteditor.h>
+#include <texteditor/basetextdocumentlayout.h>
 #include <texteditor/texteditorsettings.h>
 #include <texteditor/fontsettings.h>
 #include <texteditor/texteditorconstants.h>
@@ -112,9 +113,15 @@ int CoolScrollBar::unfoldedLinesCount() const
     QTextBlock textBlock = originalDocument().firstBlock();
     while (textBlock.isValid())
     {
-        if (textBlock.isVisible())
+        if (!textBlock.userData() ||
+            !static_cast<TextEditor::TextBlockUserData*>(textBlock.userData())->folded())
         {
             lineCount += textBlock.lineCount();
+        }
+        else
+        {
+            // Folder rows are represented with a single folded marker row.
+            lineCount += 1;
         }
         textBlock = textBlock.next();
     }
