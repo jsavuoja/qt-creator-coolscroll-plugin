@@ -123,7 +123,7 @@ int CoolScrollBar::unfoldedLinesCount() const
 ////////////////////////////////////////////////////////////////////////////
 int CoolScrollBar::linesInViewportCount() const
 {
-    return (2 * m_parentEdit->document()->lineCount() - unfoldedLinesCount() - maximum());
+    return unfoldedLinesCount() - maximum();
 }
 ////////////////////////////////////////////////////////////////////////////
 QSize CoolScrollBar::sizeHint() const
