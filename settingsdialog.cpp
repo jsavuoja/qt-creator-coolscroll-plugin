@@ -27,7 +27,7 @@
 *
 */
 
-#include <QtGui/QColorDialog>
+#include <QtWidgets/QColorDialog>
 #include "settingsdialog.h"
 #include "ui_settingsdialog.h"
 

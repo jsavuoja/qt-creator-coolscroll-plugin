@@ -30,14 +30,14 @@
 #ifndef COOLSCROLLAREA_H
 #define COOLSCROLLAREA_H
 
-#include <QtGui/QScrollBar>
+#include <QtWidgets/QScrollBar>
 #include <QtGui/QPixmap>
 #include <QTextCharFormat>
 #include <QTimer>
 
 namespace TextEditor
 {
-    class BaseTextEditorWidget;
+    class TextEditorWidget;
 }
 
 class CoolScrollbarSettings;
@@ -46,8 +46,9 @@ class QTextDocument;
 class CoolScrollBar : public QScrollBar
 {
     Q_OBJECT
+
 public:
-    CoolScrollBar(TextEditor::BaseTextEditorWidget* edit,
+    CoolScrollBar(TextEditor::TextEditorWidget* edit,
                   QSharedPointer<CoolScrollbarSettings>& settings);
 
     void markStateDirty() { m_stateDirty = true; }
@@ -104,7 +105,7 @@ private:
     qreal documentHeightVirtual() const;
     qreal documentHeightScreen() const;
 
-    TextEditor::BaseTextEditorWidget* m_parentEdit;
+    TextEditor::TextEditorWidget* m_parentEdit;
     const QSharedPointer<CoolScrollbarSettings> m_settings;
 
     QPixmap m_previewPic;

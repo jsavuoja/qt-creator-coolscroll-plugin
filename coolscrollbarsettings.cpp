@@ -30,13 +30,13 @@
 
 namespace
 {
-    const QString l_nWidth("scrollbar_width");
-    const QString l_nFontSize("preferred_font_size");
-    const QString l_nViewportColor("viewport_color");
-    const QString l_nSelectionColor("selection_color");
-    const QString l_nFoldMarkerColor("fold_marker_color");
-    const QString l_nInvertViewportColoring("invert_viewport_coloring");
-    const QString l_nContextMenu("disable_context_menu");
+    const QLatin1String l_nWidth("scrollbar_width");
+    const QLatin1String l_nFontSize("preferred_font_size");
+    const QLatin1String l_nViewportColor("viewport_color");
+    const QLatin1String l_nSelectionColor("selection_color");
+    const QLatin1String l_nFoldMarkerColor("fold_marker_color");
+    const QLatin1String l_nInvertViewportColoring("invert_viewport_coloring");
+    const QLatin1String l_nContextMenu("disable_context_menu");
 }
 
 CoolScrollbarSettings::CoolScrollbarSettings() :
@@ -50,7 +50,7 @@ CoolScrollbarSettings::CoolScrollbarSettings() :
 {
     m_font.setPointSizeF(preferredFontSize);
     m_font.setStyleHint(QFont::Monospace);
-    m_font.setFamily("monospace");
+    m_font.setFamily(QLatin1String("monospace"));
     m_font.setBold(true);
     m_font.setStyleStrategy(QFont::NoAntialias);
 

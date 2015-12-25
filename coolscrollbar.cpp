@@ -28,17 +28,17 @@
 */
 
 #include "coolscrollbar.h"
-#include <QtGui/QPlainTextEdit>
+#include <QtWidgets/QPlainTextEdit>
 #include <QtGui/QTextBlock>
 #include <QtGui/QTextLayout>
 #include <QtGui/QTextDocumentFragment>
 
 #include <QtGui/QPainter>
-#include <QApplication>
-#include <QDebug>
+#include <QtWidgets/QApplication>
+#include <QtCore/QDebug>
 
-#include <texteditor/basetexteditor.h>
-#include <texteditor/basetextdocumentlayout.h>
+#include <texteditor/texteditor.h>
+#include <texteditor/textdocumentlayout.h>
 #include <texteditor/texteditorsettings.h>
 #include <texteditor/fontsettings.h>
 #include <texteditor/texteditorconstants.h>
@@ -54,7 +54,7 @@ namespace
 }
 
 ////////////////////////////////////////////////////////////////////////////
-CoolScrollBar::CoolScrollBar(TextEditor::BaseTextEditorWidget* edit,
+CoolScrollBar::CoolScrollBar(TextEditor::TextEditorWidget* edit,
                              QSharedPointer<CoolScrollbarSettings>& settings) :
     m_parentEdit(edit),
     m_settings(settings),
@@ -97,7 +97,7 @@ void CoolScrollBar::paintEvent(QPaintEvent *event)
         TextEditor::TextEditorSettings::instance()->fontSettings();
     p.fillRect(
         rect(),
-        fontSettings.formatFor(QLatin1String(TextEditor::Constants::C_TEXT)).background());
+        fontSettings.formatFor(TextEditor::C_TEXT).background());
 
     p.drawPixmap(
         MARKER_MARGIN_WIDTH,
@@ -363,7 +363,7 @@ void CoolScrollBar::mousePressEvent(QMouseEvent *event)
 {
     if(event->button() == Qt::LeftButton)
     {
-        setValue(posToScrollValue(event->posF().y()));
+        setValue(posToScrollValue(event->localPos().y()));
         m_leftButtonPressed = true;
     }
     else if(event->button() == Qt::RightButton)
@@ -385,7 +385,7 @@ void CoolScrollBar::mouseMoveEvent(QMouseEvent *event)
 {
     if(m_leftButtonPressed)
     {
-        setValue(posToScrollValue(event->posF().y()));
+        setValue(posToScrollValue(event->localPos().y()));
     }
 }
 ////////////////////////////////////////////////////////////////////////////
@@ -448,7 +448,7 @@ void CoolScrollBar::updatePicture()
         pixmapHeight); // parentFullSize.height());
 
     pixmap.fill(
-        fontSettings.formatFor(QLatin1String(TextEditor::Constants::C_TEXT)).background());
+        fontSettings.formatFor(TextEditor::C_TEXT).background());
 
     m_parentEdit->render(
         &pixmap,

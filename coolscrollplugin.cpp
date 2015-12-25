@@ -38,11 +38,11 @@
 #include <coreplugin/actionmanager/actioncontainer.h>
 #include <coreplugin/coreconstants.h>
 
-#include <texteditor/basetexteditor.h>
+#include <texteditor/texteditor.h>
 
-#include <QtGui/QMainWindow>
-#include <QtGui/QScrollBar>
-#include <QtGui/QPushButton>
+#include <QtWidgets/QMainWindow>
+#include <QtWidgets/QScrollBar>
+#include <QtWidgets/QPushButton>
 
 #include <QtCore/QtPlugin>
 
@@ -52,7 +52,7 @@
 
 namespace
 {
-    const QString l_nSettingsGroup("CoolScroll");
+    const QLatin1String l_nSettingsGroup("CoolScroll");
 }
 
 using namespace CoolScroll::Internal;
@@ -78,7 +78,7 @@ bool CoolScrollPlugin::initialize(const QStringList &arguments, QString *errorSt
     connect(settingsPage, SIGNAL(settingsChanged()), SLOT(settingChanged()));
     addAutoReleasedObject(settingsPage);
 
-    Core::EditorManager* em = Core::ICore::instance()->editorManager();
+    Core::EditorManager* em = Core::EditorManager::instance();
     connect(em, SIGNAL(editorCreated(Core::IEditor*,QString)),
                 SLOT(editorCreated(Core::IEditor*,QString)));
 
@@ -103,8 +103,8 @@ ExtensionSystem::IPlugin::ShutdownFlag CoolScrollPlugin::aboutToShutdown()
 void CoolScrollPlugin::editorCreated(Core::IEditor *editor, const QString &fileName)
 {
     Q_UNUSED(fileName);
-    TextEditor::BaseTextEditorWidget* baseEditor = qobject_cast<TextEditor::BaseTextEditorWidget*>
-                                                   (editor->widget());
+    TextEditor::TextEditorWidget* baseEditor =
+        qobject_cast<TextEditor::TextEditorWidget*>(editor->widget());
 
     baseEditor->setVerticalScrollBar(new CoolScrollBar(baseEditor, m_settings));
 
@@ -130,9 +130,9 @@ void CoolScroll::Internal::CoolScrollPlugin::saveSettings()
 void CoolScroll::Internal::CoolScrollPlugin::settingChanged()
 {
     saveSettings();
-    Core::EditorManager* em = Core::ICore::instance()->editorManager();
+    Core::EditorManager* em = Core::EditorManager::instance();
 
-    QList<Core::IEditor*> editors = em->openedEditors();
+    QList<Core::IEditor*> editors = em->visibleEditors();
     QList<Core::IEditor*>::iterator it = editors.begin();
     // editors will update settings after next opening
     for( ; it != editors.end(); ++it)
@@ -150,9 +150,7 @@ void CoolScroll::Internal::CoolScrollPlugin::settingChanged()
 
 CoolScrollBar * CoolScrollPlugin::getEditorScrollBar(Core::IEditor *editor)
 {
-    TextEditor::BaseTextEditorWidget* baseEditor = qobject_cast<TextEditor::BaseTextEditorWidget*>
-                                                                (editor->widget());
+    TextEditor::TextEditorWidget* baseEditor =
+        qobject_cast<TextEditor::TextEditorWidget*>(editor->widget());
     return qobject_cast<CoolScrollBar*>(baseEditor->verticalScrollBar());
 }
-
-Q_EXPORT_PLUGIN2(CoolScroll, CoolScrollPlugin)

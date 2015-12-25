@@ -51,9 +51,9 @@ public:
     QString displayName() const;
     QIcon categoryIcon() const;
     QString displayCategory() const;
-    QWidget *createPage(QWidget *parent);
-    void apply();
-    void finish();
+    QWidget *widget() override;
+    void apply() override;
+    void finish() override;
 
 private:
 

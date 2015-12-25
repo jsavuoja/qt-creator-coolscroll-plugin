@@ -26,7 +26,7 @@
 * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 *
 */
-#include <QtGui/QWidget>
+#include <QtWidgets/QWidget>
 #include "settingspage.h"
 #include "settingsdialog.h"
 
@@ -41,7 +41,7 @@ SettingsPage::~SettingsPage()
 ////////////////////////////////////////////////////////////////////////////
 QString SettingsPage::id() const
 {
-    return "CoolScrollSettings";
+    return QLatin1String("CoolScrollSettings");
 }
 ////////////////////////////////////////////////////////////////////////////
 QString SettingsPage::trName() const
@@ -51,7 +51,7 @@ QString SettingsPage::trName() const
 ////////////////////////////////////////////////////////////////////////////
 QString SettingsPage::category() const
 {
-    return "CoolScroll";
+    return QLatin1String("CoolScroll");
 }
 ////////////////////////////////////////////////////////////////////////////
 QString SettingsPage::trCategory() const
@@ -89,9 +89,9 @@ void SettingsPage::finish()
     // nothing
 }
 ////////////////////////////////////////////////////////////////////////////
-QWidget * SettingsPage::createPage(QWidget *parent)
+QWidget * SettingsPage::widget()
 {
-    m_dialog = new SettingsDialog(parent);
+    m_dialog = new SettingsDialog();
     m_dialog->setSettings(*m_settings);
     return m_dialog;
 }

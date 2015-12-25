@@ -3,6 +3,11 @@ TEMPLATE = lib
 
 DEFINES += COOLSCROLL_LIBRARY
 
+QTC_PLUGIN_NAME = CoolScroll
+QTC_PLUGIN_DEPENDS = \
+    texteditor \
+    coreplugin
+
 # CoolScroll files
 
 SOURCES += coolscrollplugin.cpp \
@@ -29,20 +34,22 @@ isEmpty(IDE_BUILD_TREE):IDE_BUILD_TREE=/tmp/qtc
 
 PROVIDER = Zhuk
 
-LIBS += -L$$LIBSROOT \
--L$$LIBSROOT/qtcreator \
--L$$LIBSROOT/qtcreator/plugins/Nokia/
+LIBS += -L$$(LIBSROOT) \
+-L$$(LIBSROOT)/qtcreator \
+-L$$(LIBSROOT)/qtcreator/plugins
 
 ###
 # Set the QTC_SOURCE environment variable to set the setting here
 
-include($$QTC_SOURCE/src/qtcreatorplugin.pri)
-include($$QTC_SOURCE/src/plugins/coreplugin/coreplugin.pri)
-include($$QTC_SOURCE/src/plugins/texteditor/texteditor.pri)
+include($$(QTC_SOURCE)/src/qtcreatorplugin.pri)
+#include($$(QTC_SOURCE)/src/plugins/coreplugin/coreplugin.pri)
+#include($$(QTC_SOURCE)/src/plugins/coreplugin/coreplugin.pri)
+#include($$(QTC_SOURCE)/src/plugins/texteditor/texteditor.pri)
 
 FORMS += \
     settingsdialog.ui
 
-message(QTC_SOURCE = $$QTC_SOURCE)
-message(LIBSROOT = $$LIBSROOT)
+message(QTC_SOURCE = $$(QTC_SOURCE))
+message(LIBSROOT = $$(LIBSROOT))
+message(QTC_BUILD = $$(QTC_BUILD))
 message(Good luck with make...)
