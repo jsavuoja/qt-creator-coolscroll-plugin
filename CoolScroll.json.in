@@ -1,0 +1,11 @@
+{
+    \"Name\" : \"CoolScroll\",
+    \"Version\" : \"0.0.1\",
+    \"CompatVersion\" : \"0.0.1\",
+    \"Vendor\" : \"Jani Savuoja\",
+    \"Copyright\" : \"(C) Zhuk Egor, (C) Jani Savuoja\",
+    \"License\" : \"LGPL\",
+    \"Description\" : \"Code minimap scrollbar replacement.\",
+    \"Url\" : \"\",
+    $$dependencyList
+}
