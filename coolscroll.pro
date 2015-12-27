@@ -1,6 +1,3 @@
-TARGET = CoolScroll
-TEMPLATE = lib
-
 DEFINES += COOLSCROLL_LIBRARY
 
 QTC_PLUGIN_NAME = CoolScroll
@@ -24,8 +21,6 @@ HEADERS += coolscrollplugin.h\
     settingspage.h \
     settingsdialog.h
 
-OTHER_FILES = CoolScroll.pluginspec
-
 # Qt Creator linking
 
 ## set the QTC_BUILD environment variable to override the setting here
@@ -42,9 +37,6 @@ LIBS += -L$$(LIBSROOT) \
 # Set the QTC_SOURCE environment variable to set the setting here
 
 include($$(QTC_SOURCE)/src/qtcreatorplugin.pri)
-#include($$(QTC_SOURCE)/src/plugins/coreplugin/coreplugin.pri)
-#include($$(QTC_SOURCE)/src/plugins/coreplugin/coreplugin.pri)
-#include($$(QTC_SOURCE)/src/plugins/texteditor/texteditor.pri)
 
 FORMS += \
     settingsdialog.ui
