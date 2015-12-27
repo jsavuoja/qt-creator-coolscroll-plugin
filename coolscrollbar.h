@@ -81,8 +81,8 @@ protected:
 
 protected slots:
 
-    void documentContentChanged();
-    void documentSelectionChanged();
+    void onDocumentContentChanged();
+    void onDocumentSelectionChanged();
     void onRefreshTimeout();
     void onDocumentSizeChanged(const QSizeF& newSize);
 

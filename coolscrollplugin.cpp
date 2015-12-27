@@ -75,12 +75,11 @@ bool CoolScrollPlugin::initialize(const QStringList &arguments, QString *errorSt
     Q_UNUSED(errorString);
 
     SettingsPage* settingsPage = new SettingsPage(m_settings);
-    connect(settingsPage, SIGNAL(settingsChanged()), SLOT(settingChanged()));
+    connect(settingsPage, &SettingsPage::settingsChanged, this, &CoolScrollPlugin::onSettingChanged);
     addAutoReleasedObject(settingsPage);
 
     Core::EditorManager* em = Core::EditorManager::instance();
-    connect(em, SIGNAL(editorCreated(Core::IEditor*,QString)),
-                SLOT(editorCreated(Core::IEditor*,QString)));
+    connect(em, &Core::EditorManager::editorCreated, this, &CoolScrollPlugin::onEditorCreated);
 
     return true;
 }
@@ -100,7 +99,7 @@ ExtensionSystem::IPlugin::ShutdownFlag CoolScrollPlugin::aboutToShutdown()
     return SynchronousShutdown;
 }
 
-void CoolScrollPlugin::editorCreated(Core::IEditor *editor, const QString &fileName)
+void CoolScrollPlugin::onEditorCreated(Core::IEditor *editor, const QString &fileName)
 {
     Q_UNUSED(fileName);
     TextEditor::TextEditorWidget* baseEditor =
@@ -127,7 +126,7 @@ void CoolScroll::Internal::CoolScrollPlugin::saveSettings()
     settings->sync();
 }
 
-void CoolScroll::Internal::CoolScrollPlugin::settingChanged()
+void CoolScroll::Internal::CoolScrollPlugin::onSettingChanged()
 {
     saveSettings();
     Core::EditorManager* em = Core::EditorManager::instance();

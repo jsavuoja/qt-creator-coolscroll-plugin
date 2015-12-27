@@ -67,8 +67,8 @@ private:
 
 private slots:
 
-    void editorCreated(Core::IEditor *editor, const QString &fileName);
-    void settingChanged();
+    void onEditorCreated(Core::IEditor *editor, const QString &fileName);
+    void onSettingChanged();
 };
 
 } // namespace Internal

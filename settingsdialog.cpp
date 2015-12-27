@@ -42,17 +42,14 @@ SettingsDialog::SettingsDialog(QWidget *parent) :
     ui->fontSizeSpinBox->setRange(1.0, 5.0);
     ui->fontSizeSpinBox->setSingleStep(0.5);
 
-    connect(ui->viewportColorButton, SIGNAL(clicked()),
-                                     SLOT(colorSettingsButtonClicked()));
-    connect(ui->selectionColorButton, SIGNAL(clicked()),
-                                      SLOT(colorSettingsButtonClicked()));
-    connect(ui->foldMarkerColorButton, SIGNAL(clicked()),
-                                       SLOT(colorSettingsButtonClicked()));
+    connect(ui->viewportColorButton, &QAbstractButton::clicked, this, &SettingsDialog::onColorSettingsButtonClicked);
+    connect(ui->selectionColorButton, &QAbstractButton::clicked, this, &SettingsDialog::onColorSettingsButtonClicked);
+    connect(ui->foldMarkerColorButton, &QAbstractButton::clicked, this, &SettingsDialog::onColorSettingsButtonClicked);
 
-    connect(ui->widthSpinBox, SIGNAL(valueChanged(int)), SLOT(settingsChanged()));
-    connect(ui->fontSizeSpinBox, SIGNAL(valueChanged(double)), SLOT(settingsChanged()));
-    connect(ui->invertViewportColoring, SIGNAL(stateChanged(int)), SLOT(settingsChanged()));
-    connect(ui->contextMenuCheckBox, SIGNAL(stateChanged(int)), SLOT(settingsChanged()));
+    connect(ui->widthSpinBox, static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged), this, &SettingsDialog::onSettingsChanged);
+    connect(ui->fontSizeSpinBox, static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), this, &SettingsDialog::onSettingsChanged);
+    connect(ui->invertViewportColoring, &QCheckBox::stateChanged, this, &SettingsDialog::onSettingsChanged);
+    connect(ui->contextMenuCheckBox, &QCheckBox::stateChanged, this, &SettingsDialog::onSettingsChanged);
 }
 ////////////////////////////////////////////////////////////////////////////
 SettingsDialog::~SettingsDialog()
@@ -71,7 +68,7 @@ void SettingsDialog::setSettings(const CoolScrollbarSettings &settings)
     ui->contextMenuCheckBox->setChecked(!settings.disableContextMenu);
 }
 ////////////////////////////////////////////////////////////////////////////
-void SettingsDialog::colorSettingsButtonClicked()
+void SettingsDialog::onColorSettingsButtonClicked()
 {
     QPushButton* button = qobject_cast<QPushButton*>(sender());
     Q_ASSERT(button != 0);
@@ -83,7 +80,7 @@ void SettingsDialog::colorSettingsButtonClicked()
         if(getButtonColor(button) != dialog.selectedColor())
         {
             setButtonColor(button, dialog.selectedColor());
-            settingsChanged();
+            onSettingsChanged();
         }
     }
 }
@@ -111,7 +108,7 @@ void SettingsDialog::getSettings(CoolScrollbarSettings &settings) const
     settings.disableContextMenu = !ui->contextMenuCheckBox->isChecked();
 }
 ////////////////////////////////////////////////////////////////////////////
-void SettingsDialog::settingsChanged()
+void SettingsDialog::onSettingsChanged()
 {
     m_settingsChanged = true;
 }

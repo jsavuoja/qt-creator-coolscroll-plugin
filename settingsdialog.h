@@ -62,8 +62,8 @@ private:
 
 private slots:
 
-    void colorSettingsButtonClicked();
-    void settingsChanged();
+    void onColorSettingsButtonClicked();
+    void onSettingsChanged();
 
 };
 
