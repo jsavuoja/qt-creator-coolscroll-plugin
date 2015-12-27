@@ -17,5 +17,4 @@ input variables QTC_SOURCE and LIBSROOT for your particular setup.
     qmake -makefile QTC_SOURCE=<path-to-qt-creator-src> LIBSROOT=<path-to-qt-creator-libs-dir> ../
     make
 
-The installation step is less refined currently. I just build to local directory that's symlinked
-under the Qt Creator libs dir. Improvements here are welcome.
+The default project settings will generate the plugin under Qt Creator's user profile plugin directory.

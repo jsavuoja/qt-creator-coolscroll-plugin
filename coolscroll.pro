@@ -33,6 +33,14 @@ LIBS += -L$$(LIBSROOT) \
 -L$$(LIBSROOT)/qtcreator \
 -L$$(LIBSROOT)/qtcreator/plugins
 
+## uncomment to build plugin into user config directory
+## <localappdata>/plugins/<ideversion>
+##    where <localappdata> is e.g.
+##    "%LOCALAPPDATA%\QtProject\qtcreator" on Windows Vista and later
+##    "$XDG_DATA_HOME/data/QtProject/qtcreator" or "~/.local/share/data/QtProject/qtcreator" on Linux
+##    "~/Library/Application Support/QtProject/Qt Creator" on Mac
+USE_USER_DESTDIR = yes
+
 ###
 # Set the QTC_SOURCE environment variable to set the setting here
 
