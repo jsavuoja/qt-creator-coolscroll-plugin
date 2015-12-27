@@ -4,9 +4,9 @@ TEMPLATE = lib
 DEFINES += COOLSCROLL_LIBRARY
 
 QTC_PLUGIN_NAME = CoolScroll
-QTC_PLUGIN_DEPENDS = \
-    texteditor \
-    coreplugin
+QTC_PLUGIN_DEPENDS += \
+    coreplugin \
+    texteditor
 
 # CoolScroll files
 
